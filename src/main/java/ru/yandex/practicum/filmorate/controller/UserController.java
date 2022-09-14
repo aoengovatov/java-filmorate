@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.util.StringUtils.split;
+
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -29,6 +31,10 @@ public class UserController {
         user.setId(id);
         if(user.getName() == null){
             user.setName(user.getLogin());
+        }
+        String[] login = user.getLogin().split(" ");
+        if(login != null && login.length > 1){
+            throw new ValidationException("Ошибка. Логин не должен содержать пробелы");
         }
         users.put(id, user);
         log.info("Создан пользователь: " + user);
