@@ -19,6 +19,7 @@ public class UserController {
     private int id = 0;
     @GetMapping
     public Collection<User> getUsers(){
+        log.info("Количество пользователей: " + users.size());
         return users.values();
     }
 
@@ -30,6 +31,7 @@ public class UserController {
             user.setName(user.getLogin());
         }
         users.put(id, user);
+        log.info("Создан пользователь: " + user);
         return user;
     }
 
@@ -41,8 +43,10 @@ public class UserController {
             }
             users.put(user.getId(), user);
         } else {
+            log.warn("Нет пользователя с id: " + user.getId());
             throw new ValidationException("Ошибка. Нет пользователя с id: " + user.getId());
         }
+        log.info("Обновлен пользователь: " + user);
         return user;
     }
 

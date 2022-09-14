@@ -12,21 +12,21 @@ import java.util.Date;
 
 @Data
 @RequiredArgsConstructor
-@NotNull
+@NotNull(message = "User не может быть null")
 public class User {
     private int id;
 
-    @Email
-    @NotBlank
+    @Email(message = "Не соответствует формату e-mail")
+    @NotBlank(message = "E-mail не может быть пустым")
     private final String email;
 
-    @NotBlank
+    @NotBlank(message = "Логин не может быть пустым")
     private final String login;
 
     private String name;
 
-    @NotNull
-    @Past
+    @NotNull(message = "Дата рождения не можер быть null")
+    @Past(message = "Дата рождения должна быть в прошлом")
     @JsonFormat(pattern="yyyy-MM-dd")
     private final Date birthday;
 }

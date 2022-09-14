@@ -21,30 +21,36 @@ public class FilmController {
     private int id = 0;
     @GetMapping
     public Collection<Film> getFilms(){
+        log.info("Количество фильмов: " + films.size());
         return films.values();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) throws ParseException {
         if(film.getReleaseDate().before(formatter.parse("1895-12-28"))){
+            log.warn("Ошибка создания фильма с датой:" + film.getReleaseDate());
             throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
         }
         int id = generateId();
         film.setId(id);
         films.put(id, film);
+        log.info("Создан фильм: " + film);
         return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws ParseException {
         if(film.getReleaseDate().before(formatter.parse("1895-12-28"))){
+            log.warn("Ошибка обновления фильма с датой:" + film.getReleaseDate());
             throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
         }
         if(films.containsKey(film.getId())){
             films.put(id, film);
         } else {
+            log.warn("Нет фильма с id: " + film.getId());
             throw new ValidationException("Ошибка. Нет фильма с id: " + film.getId());
         }
+        log.info("Обновлен фильм: " + film);
         return film;
     }
 

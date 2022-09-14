@@ -9,21 +9,22 @@ import java.util.Date;
 
 @Data
 @RequiredArgsConstructor
-@NotNull
+@NotNull(message = "Film не может быть null")
 public class Film {
     private int id;
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Название фильма не может быть null")
+    @NotBlank(message = "Название фильма не может быть пустым")
     private final String name;
 
-    @Size(max=200)
+
+    @Size(max=200, message = "Описание фильма не может быть больше 200 знаков")
     private final String description;
 
-    @NotNull
+    @NotNull(message = "Дата фильма не может быть null")
     @JsonFormat(pattern="yyyy-MM-dd")
     private final Date releaseDate;
 
-    @Positive
+    @Positive(message = "Продолжительнось фильма должна быть положительной")
     private final int duration;
 }
