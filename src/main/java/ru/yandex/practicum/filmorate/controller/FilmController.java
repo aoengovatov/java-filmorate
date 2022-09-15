@@ -6,10 +6,8 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,13 +15,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-    private final Date filmBirthday = formatter.parse("1895-12-28");
+    private static final LocalDate FILM_BIRTHDAY = LocalDate.of(1895,12,28);
     private final Map<Integer, Film> films = new HashMap<>();
     private int id = 0;
-
-    public FilmController() throws ParseException {
-    }
 
     @GetMapping
     public Collection<Film> getFilms(){
@@ -33,10 +27,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if(film.getReleaseDate().before(filmBirthday)){
-            log.warn("Ошибка создания фильма с датой:" + film.getReleaseDate());
-            throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
-        }
+        dateValid(new java.sql.Date(film.getReleaseDate().getTime()).toLocalDate());
         int id = generateId();
         film.setId(id);
         films.put(id, film);
@@ -46,10 +37,7 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if(film.getReleaseDate().before(filmBirthday)){
-            log.warn("Ошибка обновления фильма с датой:" + film.getReleaseDate());
-            throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
-        }
+        dateValid(new java.sql.Date(film.getReleaseDate().getTime()).toLocalDate());
         if(films.containsKey(film.getId())){
             films.put(id, film);
         } else {
@@ -62,5 +50,12 @@ public class FilmController {
 
     private int generateId(){
         return ++id;
+    }
+
+    private static void dateValid (LocalDate date){
+        if(date.isBefore(FILM_BIRTHDAY)){
+            log.warn("Ошибка обновления фильма с датой:" + date);
+            throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
+        }
     }
 }

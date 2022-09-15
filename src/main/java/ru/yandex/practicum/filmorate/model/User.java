@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.util.Date;
 
 @Data
@@ -28,7 +25,7 @@ public class User {
     private String name;
 
     @NotNull(message = "Дата рождения не можер быть null")
-    @Past(message = "Дата рождения должна быть в прошлом")
+    @PastOrPresent(message = "Дата рождения должна быть в прошлом")
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date birthday;
 }

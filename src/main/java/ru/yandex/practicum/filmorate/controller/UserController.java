@@ -10,8 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.util.StringUtils.split;
-
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -29,9 +27,7 @@ public class UserController {
     public User create(@Valid @RequestBody User user){
         int id = generateId();
         user.setId(id);
-        if(user.getName() == null){
-            user.setName(user.getLogin());
-        }
+        user = validName(user);
         String[] login = user.getLogin().split(" ");
         if(login != null && login.length > 1){
             throw new ValidationException("Ошибка. Логин не должен содержать пробелы");
@@ -44,10 +40,7 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         if(users.containsKey(user.getId())){
-            if(user.getName() == null){
-                user.setName(user.getLogin());
-            }
-            users.put(user.getId(), user);
+            users.put(user.getId(), validName(user));
         } else {
             log.warn("Нет пользователя с id: " + user.getId());
             throw new ValidationException("Ошибка. Нет пользователя с id: " + user.getId());
@@ -58,5 +51,16 @@ public class UserController {
 
     private int generateId(){
         return ++id;
+    }
+
+    private static User validName (User user) {
+        if(user.getName() == null || user.getName().isEmpty()){
+            user.setName(user.getLogin());
+        }
+        String name = user.getName().replace(" ", "");
+        if(name.isEmpty()){
+            throw new ValidationException("Ошибка. Имя пользователя не должно содержать пробелы");
+        }
+        return user;
     }
 }

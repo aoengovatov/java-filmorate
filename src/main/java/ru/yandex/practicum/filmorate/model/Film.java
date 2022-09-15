@@ -14,8 +14,7 @@ import java.util.Date;
 @NotNull(message = "Film не может быть null")
 public class Film {
     private int id;
-
-    @NotNull(message = "Название фильма не может быть null")
+    
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
 

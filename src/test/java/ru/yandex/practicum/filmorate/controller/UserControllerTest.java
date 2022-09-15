@@ -96,6 +96,18 @@ public class UserControllerTest {
     }
 
     @Test
+    void createUserWithFailName() throws Exception {
+        User user = new User(1, "mail@mail.ru", "Login", "  ",formatter.parse("1985-12-24"));
+
+        mockMvc
+                .perform(post( "/users")
+                        .content(objectMapper.writeValueAsString(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
     void createUserNull() throws Exception {
         User user = null;
 
