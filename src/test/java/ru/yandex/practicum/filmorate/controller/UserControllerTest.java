@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,11 +21,11 @@ public class UserControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Test
     void createUserOne() throws Exception {
-        User user = new User(1, "mail@mail.ru", "testLogin", "testName",formatter.parse("1968-12-24"));
+        User user = new User(1, "mail@mail.ru", "testLogin", "testName",
+                LocalDate.of(1968,12,24));
 
         mockMvc
             .perform(post( "/users")
@@ -37,7 +37,8 @@ public class UserControllerTest {
 
     @Test
     void createUserTwo() throws Exception {
-        User user = new User(2, "mail2@mail.ru", "testLogin2", "testName2",formatter.parse("1977-12-24"));
+        User user = new User(2, "mail2@mail.ru", "testLogin2", "testName2",
+                LocalDate.of(1977,12,24));
 
         mockMvc
                 .perform(post( "/users")
@@ -49,7 +50,8 @@ public class UserControllerTest {
 
     @Test
     void createUserWithBadEmail() throws Exception {
-        User user = new User(1, "@mailmail.ru", "testLogin", "testName",formatter.parse("1968-12-24"));
+        User user = new User(1, "@mailmail.ru", "testLogin", "testName",
+                LocalDate.of(1968,12,24));
 
         mockMvc
             .perform(post( "/users")
@@ -61,7 +63,8 @@ public class UserControllerTest {
 
     @Test
     void createUserWithBadlLogin() throws Exception {
-        User user = new User(1, "mail@mail.ru", "Bad Login", "testName",formatter.parse("1968-12-24"));
+        User user = new User(1, "mail@mail.ru", "Bad Login", "testName",
+                LocalDate.of(1968,12,24));
 
         mockMvc
             .perform(post( "/users")
@@ -73,7 +76,8 @@ public class UserControllerTest {
 
     @Test
     void createUserWithFailBirthday() throws Exception {
-        User user = new User(1, "mail@mail.ru", "Login", "testName",formatter.parse("2048-12-24"));
+        User user = new User(1, "mail@mail.ru", "Login", "testName",
+                LocalDate.of(2048,12,24));
 
         mockMvc
             .perform(post( "/users")
@@ -85,7 +89,8 @@ public class UserControllerTest {
 
     @Test
     void createUserWithEmptyName() throws Exception {
-        User user = new User(1, "mail@mail.ru", "Login", "",formatter.parse("1985-12-24"));
+        User user = new User(1, "mail@mail.ru", "Login", "",
+                LocalDate.of(1985,12,24));
 
         mockMvc
                 .perform(post( "/users")
@@ -96,15 +101,29 @@ public class UserControllerTest {
     }
 
     @Test
-    void createUserWithFailName() throws Exception {
-        User user = new User(1, "mail@mail.ru", "Login", "  ",formatter.parse("1985-12-24"));
+    void createUserWithBlankName() throws Exception {
+        User user = new User(1, "mail@mail.ru", "Login", "  ",
+                LocalDate.of(1985,12,24));
 
         mockMvc
                 .perform(post( "/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void createUserWithNullName() throws Exception {
+        User user = new User(1, "mail@mail.ru", "Login", null,
+                LocalDate.of(1985,12,24));
+
+        mockMvc
+                .perform(post( "/users")
+                        .content(objectMapper.writeValueAsString(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -122,7 +141,8 @@ public class UserControllerTest {
     @Test
     void updateUser() throws Exception {
         createUserOne();
-        User user = new User(1, "mail@mail.ru", "NEWLogin", "NEWtestName",formatter.parse("1995-12-24"));
+        User user = new User(1, "mail@mail.ru", "NEWLogin", "NEWtestName",
+                LocalDate.of(1995,12,24));
 
         mockMvc
             .perform(put( "/users")
@@ -134,7 +154,8 @@ public class UserControllerTest {
 
     @Test
     void updateUserWithBadId() throws Exception {
-        User user = new User(-1, "mail@mail.ru", "NEWLogin", "NEWtestName",formatter.parse("1995-12-24"));
+        User user = new User(-1, "mail@mail.ru", "NEWLogin", "NEWtestName",
+                LocalDate.of(1995,12,24));
 
         mockMvc
                 .perform(put( "/users")

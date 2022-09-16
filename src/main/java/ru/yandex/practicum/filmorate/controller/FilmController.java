@@ -27,7 +27,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        dateValid(new java.sql.Date(film.getReleaseDate().getTime()).toLocalDate());
+        film = dateValid(film);
         int id = generateId();
         film.setId(id);
         films.put(id, film);
@@ -37,7 +37,7 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        dateValid(new java.sql.Date(film.getReleaseDate().getTime()).toLocalDate());
+        film = dateValid(film);
         if(films.containsKey(film.getId())){
             films.put(id, film);
         } else {
@@ -52,10 +52,11 @@ public class FilmController {
         return ++id;
     }
 
-    private static void dateValid (LocalDate date){
-        if(date.isBefore(FILM_BIRTHDAY)){
-            log.warn("Ошибка обновления фильма с датой:" + date);
+    private static Film dateValid (Film film){
+        if(film.getReleaseDate().isBefore(FILM_BIRTHDAY)){
+            log.warn("Ошибка обновления фильма с датой:" + film.getReleaseDate());
             throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
         }
+        return film;
     }
 }

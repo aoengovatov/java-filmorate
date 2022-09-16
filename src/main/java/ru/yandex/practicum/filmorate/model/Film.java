@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @RequiredArgsConstructor
@@ -23,8 +22,7 @@ public class Film {
     private String description;
 
     @NotNull(message = "Дата фильма не может быть null")
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private Date releaseDate;
+    private LocalDate releaseDate;
 
     @Positive(message = "Продолжительнось фильма должна быть положительной")
     private int duration;

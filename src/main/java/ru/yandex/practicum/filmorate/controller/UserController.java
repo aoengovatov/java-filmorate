@@ -27,11 +27,7 @@ public class UserController {
     public User create(@Valid @RequestBody User user){
         int id = generateId();
         user.setId(id);
-        user = validName(user);
-        String[] login = user.getLogin().split(" ");
-        if(login != null && login.length > 1){
-            throw new ValidationException("Ошибка. Логин не должен содержать пробелы");
-        }
+        user = validNameAndLogin(user);
         users.put(id, user);
         log.info("Создан пользователь: " + user);
         return user;
@@ -40,7 +36,7 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         if(users.containsKey(user.getId())){
-            users.put(user.getId(), validName(user));
+            users.put(user.getId(), validNameAndLogin(user));
         } else {
             log.warn("Нет пользователя с id: " + user.getId());
             throw new ValidationException("Ошибка. Нет пользователя с id: " + user.getId());
@@ -53,13 +49,12 @@ public class UserController {
         return ++id;
     }
 
-    private static User validName (User user) {
-        if(user.getName() == null || user.getName().isEmpty()){
+    private static User validNameAndLogin(User user) {
+        if(user.getName() == null || user.getName().isBlank()){
             user.setName(user.getLogin());
         }
-        String name = user.getName().replace(" ", "");
-        if(name.isEmpty()){
-            throw new ValidationException("Ошибка. Имя пользователя не должно содержать пробелы");
+        if(user.getLogin().contains(" ")){
+            throw new ValidationException("Ошибка. Логин пользователя не должно содержать пробелы");
         }
         return user;
     }

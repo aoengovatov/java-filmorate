@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,11 +22,11 @@ public class FilmControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Test
     void createFilm() throws Exception {
-        Film film = new Film(1, "Аватар", "Описание фильма", formatter.parse("1968-12-24"), 180);
+        Film film = new Film(1, "Аватар", "Описание фильма",
+                LocalDate.of(1968,12,24), 180);
 
         mockMvc
                 .perform(post( "/films")
@@ -49,7 +50,8 @@ public class FilmControllerTest {
 
     @Test
     void createFilmWithEmptyName() throws Exception {
-        Film film = new Film(1, "", "Описание фильма", formatter.parse("1968-12-24"), 180);
+        Film film = new Film(1, "", "Описание фильма",
+                LocalDate.of(1968,12,24), 180);
 
         mockMvc
                 .perform(post( "/films")
@@ -65,7 +67,7 @@ public class FilmControllerTest {
                 "приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, " +
                 "который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время " +
                 "«своего отсутствия», стал кандидатом Коломбани.",
-                formatter.parse("1968-12-24"), 180);
+                LocalDate.of(1968,12,24), 180);
 
         mockMvc
                 .perform(post( "/films")
@@ -78,7 +80,7 @@ public class FilmControllerTest {
     @Test
     void createFilmWithFailReleaseDate() throws Exception {
         Film film = new Film(1, "Аватар", "Описание",
-                formatter.parse("1890-12-24"), 180);
+                LocalDate.of(1890,12,24), 180);
 
         mockMvc
                 .perform(post( "/films")
@@ -91,7 +93,7 @@ public class FilmControllerTest {
     @Test
     void createFilmWithFailDuration() throws Exception {
         Film film = new Film(1, "Аватар", "Описание",
-                formatter.parse("1990-12-24"), -180);
+                LocalDate.of(1990,12,24), -180);
 
         mockMvc
                 .perform(post( "/films")
@@ -105,7 +107,7 @@ public class FilmControllerTest {
     void updateFilm() throws Exception {
         createFilm();
         Film film = new Film(1, "Аватар2", "Описание",
-                formatter.parse("1995-12-24"), 180);
+                LocalDate.of(1995,12,24), 180);
 
         mockMvc
                 .perform(put( "/films")
@@ -119,7 +121,7 @@ public class FilmControllerTest {
     void updateFilmWithFailId() throws Exception {
         createFilm();
         Film film = new Film(-1, "Аватар2", "Описание",
-                formatter.parse("1995-12-24"), 180);
+                LocalDate.of(1995,12,24), 180);
 
         mockMvc
                 .perform(put( "/films")

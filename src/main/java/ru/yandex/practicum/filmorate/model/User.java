@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @RequiredArgsConstructor
@@ -24,8 +23,7 @@ public class User {
 
     private String name;
 
-    @NotNull(message = "Дата рождения не можер быть null")
+    @NotNull(message = "Дата рождения не может быть null")
     @PastOrPresent(message = "Дата рождения должна быть в прошлом")
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private Date birthday;
+    private LocalDate birthday;
 }
