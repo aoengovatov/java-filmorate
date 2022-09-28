@@ -1,62 +1,34 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
-    private static final LocalDate FILM_BIRTHDAY = LocalDate.of(1895,12,28);
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int id = 0;
+    private final FilmService filmService;
 
     @GetMapping
     public Collection<Film> getFilms(){
-        log.info("Количество фильмов: " + films.size());
-        return films.values();
+        return filmService.getFilms();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        film = dateValid(film);
-        int id = generateId();
-        film.setId(id);
-        films.put(id, film);
-        log.info("Создан фильм: " + film);
-        return film;
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        film = dateValid(film);
-        if(films.containsKey(film.getId())){
-            films.put(id, film);
-        } else {
-            log.warn("Нет фильма с id: " + film.getId());
-            throw new ValidationException("Ошибка. Нет фильма с id: " + film.getId());
-        }
-        log.info("Обновлен фильм: " + film);
-        return film;
-    }
-
-    private int generateId(){
-        return ++id;
-    }
-
-    private static Film dateValid (Film film){
-        if(film.getReleaseDate().isBefore(FILM_BIRTHDAY)){
-            log.warn("Ошибка обновления фильма с датой:" + film.getReleaseDate());
-            throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
-        }
-        return film;
+        return filmService.update(film);
     }
 }

@@ -1,61 +1,87 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private int id = 0;
+    private final UserService userService;
     @GetMapping
     public Collection<User> getUsers(){
-        log.info("Количество пользователей: " + users.size());
-        return users.values();
+        return userService.getUsers();
+    }
+    @GetMapping( "/{id}")
+    public User getUsers(@PathVariable Integer id){
+        if(id <= 0){
+            throw new IncorrectParameterException("id");
+        }
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getUserFriends(@PathVariable Integer id){
+        if(id <= 0){
+            throw new IncorrectParameterException("id");
+        }
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId){
+        if(id <= 0){
+            throw new IncorrectParameterException("id");
+        }
+        if(otherId <= 0){
+            throw new IncorrectParameterException("otherId");
+        }
+        return userService.getCommonFriends(id, otherId);
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user){
-        int id = generateId();
-        user.setId(id);
-        user = validNameAndLogin(user);
-        users.put(id, user);
-        log.info("Создан пользователь: " + user);
-        return user;
+    public User add(@Valid @RequestBody User user){
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if(users.containsKey(user.getId())){
-            users.put(user.getId(), validNameAndLogin(user));
-        } else {
-            log.warn("Нет пользователя с id: " + user.getId());
-            throw new ValidationException("Ошибка. Нет пользователя с id: " + user.getId());
+        if(user.getId() <= 0){
+            throw new IncorrectParameterException("id");
         }
-        log.info("Обновлен пользователь: " + user);
-        return user;
+        return userService.update(user);
     }
 
-    private int generateId(){
-        return ++id;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable long id, @PathVariable long friendId){
+        if(id <= 0){
+            throw new IncorrectParameterException("id");
+        }
+        if(friendId <= 0){
+            throw new IncorrectParameterException("friendId");
+        }
+        userService.addFriend(id, friendId);
     }
 
-    private static User validNameAndLogin(User user) {
-        if(user.getName() == null || user.getName().isBlank()){
-            user.setName(user.getLogin());
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable long id, @PathVariable long friendId){
+        if(id <= 0){
+            throw new IncorrectParameterException("id");
         }
-        if(user.getLogin().contains(" ")){
-            throw new ValidationException("Ошибка. Логин пользователя не должно содержать пробелы");
+        if(friendId <= 0){
+            throw new IncorrectParameterException("friendId");
         }
-        return user;
+        userService.deleteFriend(id, friendId);
     }
 }

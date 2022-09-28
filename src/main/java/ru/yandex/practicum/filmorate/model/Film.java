@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @RequiredArgsConstructor
@@ -26,4 +27,6 @@ public class Film {
 
     @Positive(message = "Продолжительнось фильма должна быть положительной")
     private int duration;
+
+    private Set<Long> userLikes;
 }
