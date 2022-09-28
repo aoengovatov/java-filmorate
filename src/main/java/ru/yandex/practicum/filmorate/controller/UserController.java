@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -24,8 +22,9 @@ public class UserController {
         return userService.getUsers();
     }
     @GetMapping( "/{id}")
-    public User getUsers(@PathVariable Integer id){
+    public User getUserById(@PathVariable Integer id){
         if(id <= 0){
+            log.info("Запрос пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
         return userService.getUserById(id);
@@ -34,6 +33,7 @@ public class UserController {
     @GetMapping("/{id}/friends")
     public Collection<User> getUserFriends(@PathVariable Integer id){
         if(id <= 0){
+            log.info("Запрос списка друзей пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
         return userService.getUserFriends(id);
@@ -42,9 +42,11 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId){
         if(id <= 0){
+            log.info("Запрос списка общих друзей пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
         if(otherId <= 0){
+            log.info("Запрос списка общих друзей пользователя с неверным otherId: " + otherId);
             throw new IncorrectParameterException("otherId");
         }
         return userService.getCommonFriends(id, otherId);
@@ -58,6 +60,7 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         if(user.getId() <= 0){
+            log.info("Обновление пользователя с неверным id: " + user.getId());
             throw new IncorrectParameterException("id");
         }
         return userService.update(user);
@@ -66,9 +69,11 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable long id, @PathVariable long friendId){
         if(id <= 0){
+            log.info("Добавление в друзья пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
         if(friendId <= 0){
+            log.info("Добавление в друзья пользователя с неверным friendId: " + friendId);
             throw new IncorrectParameterException("friendId");
         }
         userService.addFriend(id, friendId);
@@ -77,9 +82,11 @@ public class UserController {
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable long id, @PathVariable long friendId){
         if(id <= 0){
+            log.info("Удаление из друзей пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
         if(friendId <= 0){
+            log.info("Удаление из друзей пользователя с неверным friendId: " + friendId);
             throw new IncorrectParameterException("friendId");
         }
         userService.deleteFriend(id, friendId);

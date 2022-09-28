@@ -45,6 +45,7 @@ public class UserService {
     }
 
     public List<User> getUserFriends(Integer userId){
+        log.info("Запрос списка друзей пользователя с id: " + userId);
         return getUsersFromList(userStorage.getUserFriends(userId));
     }
 
@@ -57,10 +58,12 @@ public class UserService {
                     userTwoFriends.stream()).collect(Collectors.toList());
         }
         Set<Long> commonFriends = findDuble(allFriends);
+        log.info("Запрос списка общих друзей пользователей с id: " + id + ", " + otherId);
         return getUsersFromList(commonFriends);
     }
 
     public User getUserById(Integer id){
+        log.info("Запрос пользователя с id: " + id);
         return userStorage.getUsers().stream()
                 .filter(u -> id.equals(u.getId()))
                 .findFirst()
@@ -81,6 +84,7 @@ public class UserService {
         friendFriends.add(id);
         userStorage.updateFriends(id, userFriends);
         userStorage.updateFriends(friendId, friendFriends);
+        log.info("Добавление в друзья пользователей с id: " + id + ", " + friendId);
     }
 
     public void deleteFriend(long id, long friendId){
@@ -96,6 +100,7 @@ public class UserService {
         }
         userStorage.updateFriends(id, userFriends);
         userStorage.updateFriends(friendId, friendFriends);
+        log.info("Удаление из друзей пользователей с id: " + id + ", " + friendId);
     }
 
     private int generateId(){
