@@ -25,7 +25,7 @@ public class FilmControllerTest {
 
     @Test
     void createFilm() throws Exception {
-        Film film = new Film(1, "Аватар", "Описание фильма",
+        Film film = new Film(1,"Аватар", "Описание фильма",
                 LocalDate.of(1968,12,24), 180);
 
         mockMvc
@@ -128,7 +128,7 @@ public class FilmControllerTest {
                         .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test

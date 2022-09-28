@@ -24,7 +24,7 @@ public class UserControllerTest {
 
     @Test
     void createUserOne() throws Exception {
-        User user = new User(1, "mail@mail.ru", "testLogin", "testName",
+        User user = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
 
         mockMvc
@@ -162,7 +162,7 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
