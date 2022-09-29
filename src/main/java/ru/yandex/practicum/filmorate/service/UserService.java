@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 public class UserService {
 
     private final UserStorage userStorage;
-    private int id = 0;
 
     @Autowired
     UserService(UserStorage userStorage){
@@ -29,27 +28,24 @@ public class UserService {
         return userStorage.getUsers();
     }
 
-    public User create( User user){
-        int id = generateId();
-        user.setId(id);
-        user = validNameAndLogin(user);
+    public User create(User user){
         userStorage.add(user);
         log.info("Создан пользователь: " + user);
         return user;
     }
 
     public User update(User user) {
-        userStorage.add(validNameAndLogin(user));
+        userStorage.update(user);
         log.info("Обновлен пользователь: " + user);
         return user;
     }
 
-    public List<User> getUserFriends(Integer userId){
+    public List<User> getUserFriends(long userId){
         log.info("Запрос списка друзей пользователя с id: " + userId);
         return getUsersFromList(userStorage.getUserFriends(userId));
     }
 
-    public List<User> getCommonFriends(Integer id, Integer otherId){
+    public List<User> getCommonFriends(long id, long otherId){
         Set<Long> userOneFriends = userStorage.getUserFriends(id);
         Set<Long> userTwoFriends = userStorage.getUserFriends(otherId);
         List<Long> allFriends = new ArrayList<>();
@@ -62,7 +58,7 @@ public class UserService {
         return getUsersFromList(commonFriends);
     }
 
-    public User getUserById(Integer id){
+    public User getUserById(Long id){
         log.info("Запрос пользователя с id: " + id);
         return userStorage.getUsers().stream()
                 .filter(u -> id.equals(u.getId()))
@@ -103,20 +99,6 @@ public class UserService {
         log.info("Удаление из друзей пользователей с id: " + id + ", " + friendId);
     }
 
-    private int generateId(){
-        return ++id;
-    }
-
-    private static User validNameAndLogin(User user) {
-        if(user.getName() == null || user.getName().isBlank()){
-            user.setName(user.getLogin());
-        }
-        if(user.getLogin().contains(" ")){
-            throw new ValidationException("Ошибка. Логин пользователя не должно содержать пробелы");
-        }
-        return user;
-    }
-
     private static <T> Set<T> findDuble(Collection<T> collection) {
         Set<T> elements = new HashSet<>();
         return collection.stream()
@@ -128,7 +110,7 @@ public class UserService {
         List<User> users = new ArrayList<>();
         if(userList != null){
             for(Long id : userList){
-                users.add(getUserById(id.intValue()));
+                users.add(getUserById(id));
             }
         }
         return users;

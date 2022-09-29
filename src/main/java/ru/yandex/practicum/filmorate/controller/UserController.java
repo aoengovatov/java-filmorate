@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -22,7 +23,7 @@ public class UserController {
         return userService.getUsers();
     }
     @GetMapping( "/{id}")
-    public User getUserById(@PathVariable Integer id){
+    public User getUserById(@PathVariable long id){
         if(id <= 0){
             log.info("Запрос пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
@@ -54,7 +55,7 @@ public class UserController {
 
     @PostMapping
     public User add(@Valid @RequestBody User user){
-        return userService.create(user);
+        return userService.create(validNameAndLogin(user));
     }
 
     @PutMapping
@@ -63,7 +64,7 @@ public class UserController {
             log.info("Обновление пользователя с неверным id: " + user.getId());
             throw new IncorrectParameterException("id");
         }
-        return userService.update(user);
+        return userService.update(validNameAndLogin(user));
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -90,5 +91,15 @@ public class UserController {
             throw new IncorrectParameterException("friendId");
         }
         userService.deleteFriend(id, friendId);
+    }
+
+    private static User validNameAndLogin(User user) {
+        if(user.getName() == null || user.getName().isBlank()){
+            user.setName(user.getLogin());
+        }
+        if(user.getLogin().contains(" ")){
+            throw new ValidationException("Ошибка. Логин пользователя не должен содержать пробелы");
+        }
+        return user;
     }
 }

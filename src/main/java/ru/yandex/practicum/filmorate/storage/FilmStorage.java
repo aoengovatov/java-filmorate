@@ -13,7 +13,7 @@ public interface FilmStorage {
 
     void delete(Film film);
 
-    Integer getSize();
+    long getSize();
 
     Collection<Film> getFilms();
 

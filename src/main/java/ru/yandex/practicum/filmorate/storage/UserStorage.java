@@ -12,7 +12,7 @@ public interface UserStorage {
 
     void delete(User user);
 
-    Integer getSize();
+    long getSize();
 
     Collection<User> getUsers();
 

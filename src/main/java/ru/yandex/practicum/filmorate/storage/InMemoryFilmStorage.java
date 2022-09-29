@@ -2,25 +2,26 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage{
 
-    private final Map<Integer, Film> films;
+    private final Map<Long, Film> films;
     private final Map<Long, Set<Long>> likes;
+    private long id = 0;
 
     @Override
     public void add(Film film) {
-        films.put(film.getId(), film);
+        long id = generateId();
+        film.setId(id);
+        films.put(id, film);
         Set<Long> LikesList = new HashSet<>();
-        likes.put((long) film.getId(), LikesList);
+        likes.put(id, LikesList);
     }
 
     @Override
@@ -36,13 +37,13 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Integer getSize() {
+    public long getSize() {
         return films.size();
     }
 
     @Override
-    public Collection<Film> getFilms() {
-        return films.values();
+    public List<Film> getFilms() {
+        return List.copyOf(films.values());
     }
 
     @Override
@@ -58,5 +59,9 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public void updateLikes(long id, Set<Long> friendList) {
         likes.put(id, friendList);
+    }
+
+    private long generateId(){
+        return ++id;
     }
 }

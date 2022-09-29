@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
-    private int id = 0;
-    private static final LocalDate FILM_BIRTHDAY = LocalDate.of(1895,12,28);
 
     @Autowired
     FilmService(FilmStorage filmStorage){
@@ -30,7 +28,7 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public Film getFilmById(Integer id){
+    public Film getFilmById(Long id){
         log.info("Запрос фильма с id: " + id);
         return filmStorage.getFilms().stream()
                 .filter(f -> id.equals(f.getId()))
@@ -60,16 +58,12 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        film = dateValid(film);
-        int id = generateId();
-        film.setId(id);
         filmStorage.add(film);
         log.info("Создан фильм: " + film);
         return film;
     }
 
     public Film update(Film film) {
-        film = dateValid(film);
         filmStorage.update(film);
         log.info("Обновлен фильм: " + film);
         return film;
@@ -87,25 +81,13 @@ public class FilmService {
         return getFilmsFromList(films);
     }
 
-    private static Film dateValid (Film film){
-        if(film.getReleaseDate().isBefore(FILM_BIRTHDAY)){
-            log.warn("Ошибка обновления фильма с датой:" + film.getReleaseDate());
-            throw new ValidationException("Ошибка. Дата фильма не должна быть раньше Дня рождения кино");
-        }
-        return film;
-    }
-
     private List<Film> getFilmsFromList(List<Long> filmsList){
         List<Film> films = new ArrayList<>();
         if(filmsList != null){
             for(Long id : filmsList){
-                films.add(getFilmById(id.intValue()));
+                films.add(getFilmById(id));
             }
         }
         return films;
-    }
-
-    private int generateId(){
-        return ++id;
     }
 }
