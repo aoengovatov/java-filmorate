@@ -4,11 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,29 +28,21 @@ public class FilmService {
 
     public Film getFilmById(Long id){
         log.info("Запрос фильма с id: " + id);
-        return filmStorage.getFilms().stream()
-                .filter(f -> id.equals(f.getId()))
-                .findFirst()
+        return filmStorage.getFilmById(id)
                 .orElseThrow(() -> new FilmNotFoundException(String.format("Фильм c id: %d не найден", id))
                 );
     }
 
     public void addLike(long id, long userId){
-        Set<Long> filmLikes = new HashSet<>();
-        if(filmStorage.getLikesById(id) != null){
-            filmLikes = filmStorage.getLikesById(id);
-        }
+        Set<Long> filmLikes = filmStorage.getLikesById(id);
         filmLikes.add(userId);
         filmStorage.updateLikes(id, filmLikes);
         log.info("Добавление Like фильму с id: " + id + " от пользователя с id: " + userId);
     }
 
     public void deleteLike(long id, long userId){
-        Set<Long> filmLikes = new HashSet<>();
-        if(filmStorage.getLikesById(id) != null){
-            filmLikes = filmStorage.getLikesById(id);
-            filmLikes.remove(userId);
-        }
+        Set<Long> filmLikes = filmStorage.getLikesById(id);
+        filmLikes.remove(userId);
         filmStorage.updateLikes(id, filmLikes);
         log.info("Удаление Like у фильма с id: " + id + " от пользователя с id: " + userId);
     }
@@ -82,12 +72,8 @@ public class FilmService {
     }
 
     private List<Film> getFilmsFromList(List<Long> filmsList){
-        List<Film> films = new ArrayList<>();
-        if(filmsList != null){
-            for(Long id : filmsList){
-                films.add(getFilmById(id));
-            }
-        }
-        return films;
+        return filmStorage.getFilms().stream()
+                .filter(f -> filmsList.contains(f.getId()))
+                .collect(Collectors.toList());
     }
 }

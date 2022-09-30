@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -21,6 +20,8 @@ public class InMemoryUserStorage implements UserStorage {
         long id = generateId();
         user.setId(id);
         users.put(id, user);
+        Set<Long> userFriends = new HashSet<>();
+        friends.put(id, userFriends);
     }
 
     @Override
@@ -51,8 +52,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public Optional<User> getUserById(long userId){
+        return Optional.of(users.get(userId));
+    }
+
+    @Override
     public void updateFriends(long id, Set<Long> friendList) {
-        friends.put(id, friendList);
+        friends.computeIfAbsent(id, u -> friendList);
     }
 
     private long generateId(){

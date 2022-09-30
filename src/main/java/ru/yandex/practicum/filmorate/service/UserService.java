@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -48,34 +47,23 @@ public class UserService {
     public List<User> getCommonFriends(long id, long otherId){
         Set<Long> userOneFriends = userStorage.getUserFriends(id);
         Set<Long> userTwoFriends = userStorage.getUserFriends(otherId);
-        List<Long> allFriends = new ArrayList<>();
-        if(userOneFriends != null && userTwoFriends != null){
-            allFriends = Stream.concat(userOneFriends.stream(),
-                    userTwoFriends.stream()).collect(Collectors.toList());
-        }
-        Set<Long> commonFriends = findDuble(allFriends);
+        Set<Long> commonFriends = userOneFriends.stream()
+                .filter(userTwoFriends::contains)
+                .collect(Collectors.toSet());
         log.info("Запрос списка общих друзей пользователей с id: " + id + ", " + otherId);
         return getUsersFromList(commonFriends);
     }
 
     public User getUserById(Long id){
         log.info("Запрос пользователя с id: " + id);
-        return userStorage.getUsers().stream()
-                .filter(u -> id.equals(u.getId()))
-                .findFirst()
+        return userStorage.getUserById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь c id: %d не найден", id))
                 );
     }
 
     public void addFriend(long id, long friendId){
-        Set<Long> userFriends = new HashSet<>();
-        Set<Long> friendFriends = new HashSet<>();
-        if(userStorage.getUserFriends(id) != null){
-            userFriends = userStorage.getUserFriends(id);
-        }
-        if(userStorage.getUserFriends(friendId) != null){
-            friendFriends = userStorage.getUserFriends(friendId);
-        }
+        Set<Long> userFriends = userStorage.getUserFriends(id);
+        Set<Long> friendFriends = userStorage.getUserFriends(friendId);
         userFriends.add(friendId);
         friendFriends.add(id);
         userStorage.updateFriends(id, userFriends);
@@ -84,26 +72,13 @@ public class UserService {
     }
 
     public void deleteFriend(long id, long friendId){
-        Set<Long> userFriends = new HashSet<>();
-        Set<Long> friendFriends = new HashSet<>();
-        if(userStorage.getUserFriends(id) != null){
-            userFriends = userStorage.getUserFriends(id);
-            userFriends.remove(friendId);
-        }
-        if(userStorage.getUserFriends(friendId) != null){
-            friendFriends = userStorage.getUserFriends(friendId);
-            friendFriends.remove(id);
-        }
+        Set<Long> userFriends = userStorage.getUserFriends(id);
+        Set<Long> friendFriends = userStorage.getUserFriends(friendId);
+        userFriends.remove(friendId);
+        friendFriends.remove(id);
         userStorage.updateFriends(id, userFriends);
         userStorage.updateFriends(friendId, friendFriends);
         log.info("Удаление из друзей пользователей с id: " + id + ", " + friendId);
-    }
-
-    private static <T> Set<T> findDuble(Collection<T> collection) {
-        Set<T> elements = new HashSet<>();
-        return collection.stream()
-                .filter(e -> !elements.add(e))
-                .collect(Collectors.toSet());
     }
 
     private List<User> getUsersFromList(Set<Long> userList){

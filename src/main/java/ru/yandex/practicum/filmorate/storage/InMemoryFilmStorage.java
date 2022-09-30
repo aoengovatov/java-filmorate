@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -47,6 +46,11 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
+    public Optional<Film> getFilmById(long filmId){
+        return Optional.of(films.get(filmId));
+    }
+
+    @Override
     public Map<Long, Set<Long>> getLikes() {
         return likes;
     }
@@ -58,7 +62,7 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public void updateLikes(long id, Set<Long> friendList) {
-        likes.put(id, friendList);
+        likes.computeIfAbsent(id, u -> friendList);
     }
 
     private long generateId(){

@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public interface FilmStorage {
@@ -16,6 +17,8 @@ public interface FilmStorage {
     long getSize();
 
     Collection<Film> getFilms();
+
+    Optional<Film> getFilmById(long filmId);
 
     Map<Long, Set<Long>> getLikes();
 
