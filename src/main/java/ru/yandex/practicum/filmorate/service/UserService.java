@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -41,17 +40,19 @@ public class UserService {
 
     public List<User> getUserFriends(long userId){
         log.info("Запрос списка друзей пользователя с id: " + userId);
-        return getUsersFromList(userStorage.getUserFriends(userId));
+        return userStorage.getUserFriends(userId).stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(long id, long otherId){
+        log.info("Запрос списка общих друзей пользователей с id: " + id + ", " + otherId);
         Set<Long> userOneFriends = userStorage.getUserFriends(id);
         Set<Long> userTwoFriends = userStorage.getUserFriends(otherId);
-        Set<Long> commonFriends = userOneFriends.stream()
+        return userOneFriends.stream()
                 .filter(userTwoFriends::contains)
-                .collect(Collectors.toSet());
-        log.info("Запрос списка общих друзей пользователей с id: " + id + ", " + otherId);
-        return getUsersFromList(commonFriends);
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public User getUserById(Long id){
@@ -79,15 +80,5 @@ public class UserService {
         userStorage.updateFriends(id, userFriends);
         userStorage.updateFriends(friendId, friendFriends);
         log.info("Удаление из друзей пользователей с id: " + id + ", " + friendId);
-    }
-
-    private List<User> getUsersFromList(Set<Long> userList){
-        List<User> users = new ArrayList<>();
-        if(userList != null){
-            for(Long id : userList){
-                users.add(getUserById(id));
-            }
-        }
-        return users;
     }
 }

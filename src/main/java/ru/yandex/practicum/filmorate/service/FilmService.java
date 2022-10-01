@@ -60,20 +60,9 @@ public class FilmService {
     }
 
     public List<Film> getPopular(Integer count){
-        Map<Long, Integer> filmsList =  filmStorage.getLikes().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, f -> f.getValue().size()));
-        List<Long> films = filmsList.entrySet().stream()
-                .sorted(Map.Entry.<Long,Integer>comparingByValue().reversed())
+        return filmStorage.getFilms().stream().sorted((o1, o2) ->
+                        filmStorage.getLikesById(o2.getId()).size() - filmStorage.getLikesById(o1.getId()).size())
                 .limit(count)
-                .map(f -> f.getKey())
-                .collect(Collectors.toList());
-        log.info("Запрос списка популярных фильмов с count: " + count);
-        return getFilmsFromList(films);
-    }
-
-    private List<Film> getFilmsFromList(List<Long> filmsList){
-        return filmStorage.getFilms().stream()
-                .filter(f -> filmsList.contains(f.getId()))
                 .collect(Collectors.toList());
     }
 }
