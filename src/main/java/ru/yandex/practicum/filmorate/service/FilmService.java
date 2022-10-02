@@ -15,10 +15,12 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserService userService;
 
     @Autowired
-    FilmService(FilmStorage filmStorage){
+    FilmService(FilmStorage filmStorage, UserService userService){
         this.filmStorage = filmStorage;
+        this.userService = userService;
     }
 
     public Collection<Film> getFilms(){
@@ -34,14 +36,18 @@ public class FilmService {
     }
 
     public void addLike(long id, long userId){
+        filmStorage.getFilmById(id);
         Set<Long> filmLikes = filmStorage.getLikesById(id);
+        userService.getUserById(userId);
         filmLikes.add(userId);
         filmStorage.updateLikes(id, filmLikes);
         log.info("Добавление Like фильму с id: " + id + " от пользователя с id: " + userId);
     }
 
     public void deleteLike(long id, long userId){
+        filmStorage.getFilmById(id);
         Set<Long> filmLikes = filmStorage.getLikesById(id);
+        userService.getUserById(userId);
         filmLikes.remove(userId);
         filmStorage.updateLikes(id, filmLikes);
         log.info("Удаление Like у фильма с id: " + id + " от пользователя с id: " + userId);
@@ -54,6 +60,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        getFilmById(film.getId());
         filmStorage.update(film);
         log.info("Обновлен фильм: " + film);
         return film;
