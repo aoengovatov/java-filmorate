@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -12,7 +10,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NotNull(message = "User не может быть null")
 public class User {
-    private int id;
+
+    private long id;
 
     @Email(message = "Не соответствует формату e-mail")
     @NotBlank(message = "E-mail не может быть пустым")

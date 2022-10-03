@@ -12,11 +12,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NotNull(message = "Film не может быть null")
 public class Film {
-    private int id;
-    
+    private long id;
+
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
-
 
     @Size(max=200, message = "Описание фильма не может быть больше 200 знаков")
     private String description;
