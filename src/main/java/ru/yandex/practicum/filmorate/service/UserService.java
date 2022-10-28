@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -14,10 +15,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
+
     private final UserStorage userStorage;
 
     @Autowired
-    UserService(UserStorage userStorage){
+    UserService(@Qualifier("userDbStorage") UserStorage userStorage){
         this.userStorage = userStorage;
     }
 
@@ -27,7 +29,7 @@ public class UserService {
     }
 
     public User create(User user){
-        userStorage.add(user);
+        user = userStorage.add(user);
         log.info("Создан пользователь: " + user);
         return user;
     }
@@ -70,23 +72,18 @@ public class UserService {
         getUserById(id);
         getUserById(friendId);
         Set<Long> userFriends = userStorage.getUserFriends(id);
-        Set<Long> friendFriends = userStorage.getUserFriends(friendId);
         userFriends.add(friendId);
-        friendFriends.add(id);
         userStorage.updateFriends(id, userFriends);
-        userStorage.updateFriends(friendId, friendFriends);
-        log.info("Добавление в друзья пользователей с id: " + id + ", " + friendId);
+        log.info("Добавление в друзья user с id: " + id + " друга с id: " + friendId);
     }
 
     public void deleteFriend(long id, long friendId){
         getUserById(id);
         getUserById(friendId);
         Set<Long> userFriends = userStorage.getUserFriends(id);
-        Set<Long> friendFriends = userStorage.getUserFriends(friendId);
-        userFriends.remove(friendId);
-        friendFriends.remove(id);
-        userStorage.updateFriends(id, userFriends);
-        userStorage.updateFriends(friendId, friendFriends);
-        log.info("Удаление из друзей пользователей с id: " + id + ", " + friendId);
+        if(userFriends.contains(friendId)){
+            userStorage.deleteFriend(id, friendId);
+            log.info("Удаление из друзей user с id: " + id + " друга с id: " + friendId);
+        }
     }
 }

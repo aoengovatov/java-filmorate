@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
+@Builder
 @NotNull(message = "User не может быть null")
 public class User {
 

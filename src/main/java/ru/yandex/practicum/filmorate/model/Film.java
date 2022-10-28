@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
@@ -25,4 +26,10 @@ public class Film {
 
     @Positive(message = "Продолжительнось фильма должна быть положительной")
     private int duration;
+
+    @Positive(message = "Рейтинг фильма должен быть положительным")
+    private int rate;
+
+    @NotNull(message = "Рейтинг mpa не может быть null")
+    private List<Integer> mpa;
 }
