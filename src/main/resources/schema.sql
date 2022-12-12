@@ -1,43 +1,42 @@
-create table IF NOT EXISTS rating
+create table IF NOT EXISTS mpa
 (
-    rating_id integer primary key not null,
-    rating_name varchar(50) not null
+    id integer primary key not null,
+    name varchar(50) not null
 );
 
 create table IF NOT EXISTS genre
 (
-    genre_id integer primary key not null,
-    genre_name varchar(50) not null
+    id integer primary key not null,
+    name varchar(50) not null
 );
 
 create table IF NOT EXISTS films
 (
-    id      integer      auto_increment
-                primary key,
+    id integer auto_increment primary key,
     name    varchar(50)  not null,
     description  varchar(200) not null,
     release_date date         not null,
     duration     integer      not null,
-    rating_id    integer      not null,
+    mpa    integer      not null,
     rate         integer,
     constraint FILMS_RATING__FK
-        foreign key (rating_id) references rating
+        foreign key (mpa) references mpa(id)
 );
 
-create table IF NOT EXISTS films_category
+create table IF NOT EXISTS film_genres
 (
-    film_id integer primary key not null,
+    id integer auto_increment primary key,
+    film_id integer not null,
     genre_id integer not null,
-    constraint FILMS_CATEGORY_GENRE__FK
-        foreign key (genre_id) references genre,
-    constraint FILMS_CATEGORY_FILMS__FK
+    constraint FILM_GENRES_GENRE__FK
+        foreign key (genre_id) references genre(id),
+    constraint FILM_GENRES_FILMS__FK
         foreign key (film_id) references films(id)
 );
 
 create table IF NOT EXISTS users
 (
-    id integer auto_increment
-        primary key not null,
+    id integer auto_increment primary key,
     name varchar(100),
     login varchar(50),
     email varchar(50) not null,
@@ -46,21 +45,23 @@ create table IF NOT EXISTS users
 
 create table IF NOT EXISTS film_likes
 (
-    film_id integer primary key not null,
+    id integer auto_increment primary key,
+    film_id integer not null,
     user_id integer not null,
-    constraint FILMS_LIKES_FILMS__FK
-        foreign key (film_id) references films(id),
-    constraint FILMS_LIKES_USERS__FK
+    constraint FILM_LIKES_FILMS__FK
+        foreign key (film_id) references films(id) ON DELETE CASCADE,
+    constraint FILM_LIKES_USERS__FK
         foreign key (user_id) references users(id)
 );
 
 create table IF NOT EXISTS friends
 (
+    id integer auto_increment primary key,
     user_id integer not null,
     friend_id integer not null,
     status boolean not null,
     constraint FRIENDS_USERS__FK
         foreign key (user_id) references users(id),
     constraint FRIENDS_USERS_FRIENDS_FK
-        foreign key (friend_id) references users (id)
+        foreign key (friend_id) references users(id)
 );

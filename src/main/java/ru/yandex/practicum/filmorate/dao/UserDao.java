@@ -23,4 +23,5 @@ public interface UserDao {
 
     void deleteFriend(long id, long userFriend);
 
+    long getSize();
 }

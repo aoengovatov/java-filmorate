@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
 
@@ -15,19 +17,21 @@ public class InMemoryFilmStorage implements FilmStorage{
     private long id = 0;
 
     @Override
-    public void add(Film film) {
+    public Film add(Film film) {
         long id = generateId();
         film.setId(id);
         films.put(id, film);
         Set<Long> LikesList = new HashSet<>();
         likes.put(id, LikesList);
+        return null;
     }
 
     @Override
-    public void update(Film film) {
+    public Film update(Film film) {
         if(films.containsKey(film.getId())){
             films.put(film.getId(), film);
         }
+        return film;
     }
 
     @Override
@@ -61,8 +65,33 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public void updateLikes(long id, Set<Long> friendList) {
+    public void updateLikes(long id, Set<Long> friendList, int rate) {
         likes.computeIfAbsent(id, u -> friendList);
+    }
+
+    @Override
+    public List<Film> getPopular(Integer count) {
+        return null;
+    }
+
+    @Override
+    public Collection<Genre> getGenres() {
+        return null;
+    }
+
+    @Override
+    public Optional<Genre> getGenreById(int id) {
+        return null;
+    }
+
+    @Override
+    public Collection<Mpa> getMpa() {
+        return null;
+    }
+
+    @Override
+    public Optional<Mpa> getMpaById(int id) {
+        return Optional.empty();
     }
 
     private long generateId(){

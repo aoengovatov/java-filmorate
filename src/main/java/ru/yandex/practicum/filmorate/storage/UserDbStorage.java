@@ -38,7 +38,7 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public long getSize() {
-        return 0;
+        return userDao.getSize();
     }
 
     @Override

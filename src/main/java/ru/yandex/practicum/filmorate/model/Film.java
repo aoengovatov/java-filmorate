@@ -1,16 +1,19 @@
 package ru.yandex.practicum.filmorate.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
+@Builder
 @NotNull(message = "Film не может быть null")
 public class Film {
     private long id;
@@ -27,9 +30,12 @@ public class Film {
     @Positive(message = "Продолжительнось фильма должна быть положительной")
     private int duration;
 
-    @Positive(message = "Рейтинг фильма должен быть положительным")
     private int rate;
 
     @NotNull(message = "Рейтинг mpa не может быть null")
-    private List<Integer> mpa;
+    @Schema(example = "{\"id\": 1}")
+    private Mpa mpa;
+
+    @Schema(example = "[{\"id\": 1}]")
+    private Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
 }
