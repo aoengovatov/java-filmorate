@@ -71,10 +71,10 @@ public class FilmDaoImpl implements FilmDao{
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql1, filmId);
         if(filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sql1, (rs, rowNum) -> mapRowToFilm(rs, rowNum), filmId);
-            log.info("РќР°Р№РґРµРЅ С„РёР»СЊРј: {} {}", film.getId(), film.getName());
+            log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
-            log.info("РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј {} РЅРµ РЅР°Р№РґРµРЅ.", filmId);
+            log.info("Фильм с id: {} не найден.", filmId);
             return Optional.empty();
         }
     }
@@ -115,11 +115,11 @@ public class FilmDaoImpl implements FilmDao{
                     genreRows.getInt("id"),
                     genreRows.getString("name"));
 
-            log.info("РќР°Р№РґРµРЅ Р¶Р°РЅСЂ: {} {}", genre.getId(), genre.getName());
+            log.info("Найден жанр: {} {}", genre.getId(), genre.getName());
 
             return Optional.of(genre);
         } else {
-            log.info("Р–Р°РЅСЂ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј {} РЅРµ РЅР°Р№РґРµРЅ.", genreId);
+            log.info("Жанр с id: {} не найден.", genreId);
             return Optional.empty();
         }
     }
@@ -138,11 +138,11 @@ public class FilmDaoImpl implements FilmDao{
                     genreRows.getInt("id"),
                     genreRows.getString("name"));
 
-            log.info("РќР°Р№РґРµРЅ Р¶Р°РЅСЂ: {} {}", mpa.getId(), mpa.getName());
+            log.info("Найден mpa: {} {}", mpa.getId(), mpa.getName());
 
             return Optional.of(mpa);
         } else {
-            log.info("Р–Р°РЅСЂ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј {} РЅРµ РЅР°Р№РґРµРЅ.", mpaId);
+            log.info("Mpa с id: {} не найден.", mpaId);
             return Optional.empty();
         }
     }
