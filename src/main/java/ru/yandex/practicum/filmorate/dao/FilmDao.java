@@ -30,8 +30,4 @@ public interface FilmDao {
     Collection<Mpa> getMpa();
 
     Optional<Mpa> getMpaById(int id);
-
-    Set<Long> getLikesById(long id);
-
-    void updateLikes(long id, Set<Long> friendList, int rate);
 }

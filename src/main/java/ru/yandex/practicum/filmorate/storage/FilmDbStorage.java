@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.LikeDao;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -13,10 +14,12 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage{
 
     private final FilmDao filmDao;
+    private final LikeDao likeDao;
 
     @Autowired
-    public FilmDbStorage(FilmDao filmDao) {
+    public FilmDbStorage(FilmDao filmDao, LikeDao likeDao) {
         this.filmDao = filmDao;
+        this.likeDao = likeDao;
     }
 
     @Override
@@ -50,18 +53,13 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     @Override
-    public Map<Long, Set<Long>> getLikes() {
-        return null;
-    }
-
-    @Override
     public Set<Long> getLikesById(long id) {
-        return filmDao.getLikesById(id);
+        return likeDao.getByFilmId(id);
     }
 
     @Override
-    public void updateLikes(long id, Set<Long> friendList, int rate) {
-        filmDao.updateLikes(id, friendList, rate);
+    public void updateLikes(long id, Set<Long> friendList) {
+        likeDao.addByFriendList(id, friendList);
     }
 
     @Override

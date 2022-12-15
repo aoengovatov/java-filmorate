@@ -21,8 +21,13 @@ import java.util.*;
 public class FilmDaoImpl implements FilmDao{
 
     private JdbcTemplate jdbcTemplate;
-    public FilmDaoImpl(JdbcTemplate jdbcTemplate){
+
+    private GenreDao genreDao;
+    private LikeDao likeDao;
+    public FilmDaoImpl(JdbcTemplate jdbcTemplate, GenreDao genreDao, LikeDao likeDao){
         this.jdbcTemplate = jdbcTemplate;
+        this.genreDao = genreDao;
+        this.likeDao = likeDao;
     }
 
     @Override
@@ -37,10 +42,11 @@ public class FilmDaoImpl implements FilmDao{
             stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
             stmt.setInt(4, film.getDuration());
             stmt.setInt(5, film.getMpa().getId());
-            stmt.setInt(6, film.getRate());
+            stmt.setInt(6, 0);
             return stmt;
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
+        film.setId(id);
 
         if(!film.getGenres().isEmpty()){
             for (Genre genre : film.getGenres()){
@@ -49,7 +55,8 @@ public class FilmDaoImpl implements FilmDao{
                 jdbcTemplate.update(sql, id, genre.getId());
             }
         }
-        return getFilmById(id).get();
+        film.setGenres(getGenresByFilm(id));
+        return film;
     }
 
     @Override
@@ -61,13 +68,13 @@ public class FilmDaoImpl implements FilmDao{
 
     @Override
     public Collection<Film> getFilms() {
-        String sqlQuery = "select * from films";
+        String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
 
     @Override
     public Optional<Film> getFilmById(long filmId) {
-        String sql1 = "select * from films where id = ?";
+        String sql1 = "select * from films as f join mpa as m on f.mpa = m.mpa_id and f.id = ?";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql1, filmId);
         if(filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sql1, (rs, rowNum) -> mapRowToFilm(rs, rowNum), filmId);
@@ -83,21 +90,17 @@ public class FilmDaoImpl implements FilmDao{
     public Film update(Film film) {
         jdbcTemplate.update("update films set name = ?, description = ?, release_date = ?, " +
                         "duration = ?, rate = ?, mpa = ? where id = ?", film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
-        jdbcTemplate.update("delete from film_genres where film_id = ?", film.getId());
-        if(!film.getGenres().isEmpty()){
-            for (Genre genre : film.getGenres()){
-                String sql = "insert into film_genres (film_id, genre_id)" +
-                        " values (?,?)";
-                jdbcTemplate.update(sql, film.getId(), genre.getId());
-            }
-        }
-        return getFilmById(film.getId()).get();
+                film.getReleaseDate(), film.getDuration(), 0, film.getMpa().getId(), film.getId());
+        genreDao.deleteInFilm(film.getId());
+        genreDao.updateInFilm(film);
+        film.setGenres(getGenresByFilm(film.getId()));
+        return film;
     }
 
     @Override
     public List<Film> getPopular(Integer count) {
-        String sqlQuery = "select * from films order by rate desc limit ?";
+        String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id " +
+                "order by rate desc limit ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
     }
 
@@ -132,11 +135,11 @@ public class FilmDaoImpl implements FilmDao{
 
     @Override
     public Optional<Mpa> getMpaById(int mpaId) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from mpa where id = ?", mpaId);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from mpa where mpa_id = ?", mpaId);
         if(genreRows.next()) {
             Mpa mpa = new Mpa(
-                    genreRows.getInt("id"),
-                    genreRows.getString("name"));
+                    genreRows.getInt("mpa_id"),
+                    genreRows.getString("mpa_name"));
 
             log.info("Найден mpa: {} {}", mpa.getId(), mpa.getName());
 
@@ -147,38 +150,9 @@ public class FilmDaoImpl implements FilmDao{
         }
     }
 
-    @Override
-    public Set<Long> getLikesById(long id) {
-        String sql3 = "select user_id from film_likes where film_id = ?";
-        SqlRowSet likeRows = jdbcTemplate.queryForRowSet(sql3, id);
-        Set<Long> likes = new HashSet<>();
-        if(likeRows.next()) {
-            likes.add(likeRows.getLong("user_id"));
-        }
-        return likes;
-    }
-
-    @Override
-    public void updateLikes(long id, Set<Long> friendList, int rate) {
-        if(rate == -1){
-            String sql4 = "delete from film_likes where film_id = ?";
-            jdbcTemplate.update(sql4, id);
-        }
-        for(long userId : friendList){
-            String sql4 = "insert into film_likes(user_id, film_id) values (?,?)";
-            jdbcTemplate.update(sql4, id, userId);
-        }
-        String sqlQ = "select rate from films where id = ?";
-        Integer totalFilmRate = jdbcTemplate.queryForObject(sqlQ, Integer.class, id);
-        totalFilmRate += rate;
-        String sql = "update films set rate = ? where id = ?";
-        jdbcTemplate.update(sql, totalFilmRate, id);
-    }
-
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        Integer mpaId = resultSet.getInt("mpa");
-        String sqlQ = "select name from mpa where id = ?";
-        String mpaName = jdbcTemplate.queryForObject(sqlQ, String.class, mpaId);
+        int mpaId = resultSet.getInt("mpa_id");
+        String mpaName = resultSet.getString("mpa_name");;
         Mpa mpa = new Mpa(mpaId, mpaName);
 
         Film film = Film.builder()
@@ -203,8 +177,8 @@ public class FilmDaoImpl implements FilmDao{
 
     private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
         return Mpa.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
+                .id(resultSet.getInt("mpa_id"))
+                .name(resultSet.getString("mpa_name"))
                 .build();
     }
 

@@ -14,7 +14,6 @@ import java.util.*;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-@NotNull(message = "Film не может быть null")
 public class Film {
     private long id;
 

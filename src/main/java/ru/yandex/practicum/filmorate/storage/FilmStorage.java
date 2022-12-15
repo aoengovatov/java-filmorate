@@ -19,11 +19,9 @@ public interface FilmStorage {
 
     Optional<Film> getFilmById(long filmId);
 
-    Map<Long, Set<Long>> getLikes();
-
     Set<Long> getLikesById(long id);
 
-    void updateLikes(long id, Set<Long> friendList, int rate);
+    void updateLikes(long id, Set<Long> friendList);
 
     List<Film> getPopular(Integer count);
 

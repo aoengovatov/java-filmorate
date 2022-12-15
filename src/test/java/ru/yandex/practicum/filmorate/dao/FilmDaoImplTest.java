@@ -147,7 +147,7 @@ public class FilmDaoImplTest {
         userStorage.add(user1);
         Set<Long> filmLikes1 = filmStorage.getLikesById(1);
         filmLikes1.add(user1.getId());
-        filmStorage.updateLikes(1, filmLikes1, 1);
+        filmStorage.updateLikes(1, filmLikes1);
 
         Set<Long> filmLikes2 = filmStorage.getLikesById(1);
         assertEquals(filmLikes2.size(), 1);
@@ -175,7 +175,7 @@ public class FilmDaoImplTest {
         userStorage.add(user1);
         Set<Long> filmLikes1 = filmStorage.getLikesById(1);
         filmLikes1.add(user1.getId());
-        filmStorage.updateLikes(1, filmLikes1, 1);
+        filmStorage.updateLikes(1, filmLikes1);
         Optional<Film> filmOptional1 = filmStorage.getFilmById(1);
         assertThat(filmOptional1)
                 .isPresent()
@@ -195,7 +195,7 @@ public class FilmDaoImplTest {
         userStorage.add(user1);
         Set<Long> filmLikes1 = filmStorage.getLikesById(1);
         filmLikes1.add(user1.getId());
-        filmStorage.updateLikes(film1.getId(), filmLikes1, 1);
+        filmStorage.updateLikes(film1.getId(), filmLikes1);
         Optional<Film> filmOptional = filmStorage.getFilmById(1);
         assertThat(filmOptional)
                 .isPresent()
@@ -204,7 +204,7 @@ public class FilmDaoImplTest {
 
         Set<Long> filmLikes2 = filmStorage.getLikesById(1);
         filmLikes2.remove(user1.getId());
-        filmStorage.updateLikes(1, filmLikes2, -1);
+        filmStorage.updateLikes(1, filmLikes2);
         Optional<Film> filmOptional1 = filmStorage.getFilmById(1);
         assertThat(filmOptional1)
                 .isPresent()

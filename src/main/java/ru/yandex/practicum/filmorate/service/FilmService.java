@@ -36,7 +36,7 @@ public class FilmService {
                 );
     }
 
-    public Collection<Film> getFilms(){
+    public Collection<Film> getAll(){
         log.info("Количество фильмов: " + filmStorage.getSize());
         return filmStorage.getFilms();
     }
@@ -53,7 +53,7 @@ public class FilmService {
         Set<Long> filmLikes = filmStorage.getLikesById(id);
         userService.getUserById(userId);
         filmLikes.add(userId);
-        filmStorage.updateLikes(id, filmLikes, 1);
+        filmStorage.updateLikes(id, filmLikes);
         log.info("Добавление Like фильму с id: " + id + " от пользователя с id: " + userId);
     }
 
@@ -62,7 +62,7 @@ public class FilmService {
         Set<Long> filmLikes = filmStorage.getLikesById(id);
         userService.getUserById(userId);
         filmLikes.remove(userId);
-        filmStorage.updateLikes(id, filmLikes, -1);
+        filmStorage.updateLikes(id, filmLikes);
         log.info("Удаление Like у фильма с id: " + id + " от пользователя с id: " + userId);
     }
 

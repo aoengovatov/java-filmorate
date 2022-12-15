@@ -23,8 +23,8 @@ public class FilmController {
     private static final LocalDate FILM_BIRTHDAY = LocalDate.of(1895,12,28);
 
     @GetMapping
-    public Collection<Film> getFilms(){
-        return filmService.getFilms();
+    public Collection<Film> getAll(){
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")
@@ -80,7 +80,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     @Validated
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false)
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10")
                                        @Positive Integer count){
         return filmService.getPopular(count);
     }

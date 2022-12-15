@@ -1,7 +1,7 @@
 create table IF NOT EXISTS mpa
 (
-    id integer primary key not null,
-    name varchar(50) not null
+    mpa_id integer primary key not null,
+    mpa_name varchar(50) not null
 );
 
 create table IF NOT EXISTS genre
@@ -20,7 +20,7 @@ create table IF NOT EXISTS films
     mpa    integer      not null,
     rate         integer,
     constraint FILMS_RATING__FK
-        foreign key (mpa) references mpa(id)
+        foreign key (mpa) references mpa(mpa_id)
 );
 
 create table IF NOT EXISTS film_genres

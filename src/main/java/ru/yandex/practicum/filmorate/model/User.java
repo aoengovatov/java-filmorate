@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-@NotNull(message = "User не может быть null")
 public class User {
 
     private long id;
