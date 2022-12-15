@@ -90,7 +90,7 @@ public class FilmDaoImplTest {
                 .hasValueSatisfying(film ->
                         assertThat(film).hasFieldOrPropertyWithValue("duration", 150))
                 .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("rate", 4))
+                        assertThat(film).hasFieldOrPropertyWithValue("rate", 0))
                 .hasValueSatisfying(film ->
                         assertThat(film).hasFieldOrPropertyWithValue("mpa", mpaTest))
                 .hasValueSatisfying(film ->
@@ -163,13 +163,13 @@ public class FilmDaoImplTest {
         Mpa mpa = new Mpa(1, "null");
         Set<Genre> genres = new TreeSet<>();
         Film film1 = new Film(1, "Аватар", "Описание",
-                LocalDate.of(1995,12,24), 180, 8, mpa, genres);
+                LocalDate.of(1995,12,24), 180, 0, mpa, genres);
         filmStorage.add(film1);
         Optional<Film> filmOptional = filmStorage.getFilmById(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("rate", 8));
+                        assertThat(film).hasFieldOrPropertyWithValue("rate", 0));
         User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
         userStorage.add(user1);
@@ -180,7 +180,7 @@ public class FilmDaoImplTest {
         assertThat(filmOptional1)
                 .isPresent()
                 .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("rate", 9));
+                        assertThat(film).hasFieldOrPropertyWithValue("rate", 1));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class FilmDaoImplTest {
         Mpa mpa = new Mpa(1, "null");
         Set<Genre> genres = new TreeSet<>();
         Film film1 = new Film(1, "Аватар", "Описание",
-                LocalDate.of(1995,12,24), 180, 8, mpa, genres);
+                LocalDate.of(1995,12,24), 180, 0, mpa, genres);
         filmStorage.add(film1);
         User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
@@ -200,7 +200,7 @@ public class FilmDaoImplTest {
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("rate", 9));
+                        assertThat(film).hasFieldOrPropertyWithValue("rate", 1));
 
         Set<Long> filmLikes2 = filmStorage.getLikesById(1);
         filmLikes2.remove(user1.getId());
@@ -209,7 +209,7 @@ public class FilmDaoImplTest {
         assertThat(filmOptional1)
                 .isPresent()
                 .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("rate", 8));
+                        assertThat(film).hasFieldOrPropertyWithValue("rate", 0));
     }
 
     @Test
@@ -218,13 +218,19 @@ public class FilmDaoImplTest {
         Mpa mpa = new Mpa(2, "null");
         Set<Genre> genres = new TreeSet<>();
         Film film2 = new Film(2, "Аватар2", "Описание обновленное",
-                LocalDate.of(1996,11,22), 150, 4, mpa, genres);
+                LocalDate.of(1996,11,22), 150, 0, mpa, genres);
         filmStorage.add(film2);
+        User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
+                LocalDate.of(1968,12,24));
+        userStorage.add(user1);
+        Set<Long> filmLikes2 = filmStorage.getLikesById(1);
+        filmLikes2.add(user1.getId());
+        filmStorage.updateLikes(film2.getId(), filmLikes2);
         List<Film> rateFilms = filmStorage.getPopular(2);
         assertEquals(rateFilms.size(), 2);
         Film filmFirstRate = rateFilms.get(0);
         assertThat(filmFirstRate)
-                .hasFieldOrPropertyWithValue("rate", 4);
+                .hasFieldOrPropertyWithValue("rate", 1);
     }
 
     @Test
