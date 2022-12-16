@@ -15,11 +15,11 @@ public interface UserStorage {
 
     long getSize();
 
-    Collection<User> getUsers();
+    Collection<User> getAll();
 
-    Set<Long> getUserFriends(long userId);
+    Set<Long> getFriends(long userId);
 
-    Optional<User> getUserById(long userId);
+    Optional<User> getById(long userId);
 
     void deleteFriend(long id, long userFriend);
 

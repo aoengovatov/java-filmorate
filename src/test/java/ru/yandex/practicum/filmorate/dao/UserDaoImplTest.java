@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class UserDaoImplTest {
     @Test
     public void createUser() {
         data();
-        Optional<User> userOptional = userStorage.getUserById(1);
+        Optional<User> userOptional = userStorage.getById(1);
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
@@ -62,7 +61,7 @@ public class UserDaoImplTest {
                 LocalDate.of(1967,11,22));
         userStorage.update(userUpdate);
 
-        Optional<User> userOptional = userStorage.getUserById(1);
+        Optional<User> userOptional = userStorage.getById(1);
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
@@ -80,7 +79,7 @@ public class UserDaoImplTest {
     @Test
     public void deleteUser() {
         data();
-        Optional<User> userOptional1 = userStorage.getUserById(1);
+        Optional<User> userOptional1 = userStorage.getById(1);
         assertThat(userOptional1)
                 .isPresent()
                 .hasValueSatisfying(user ->
@@ -90,7 +89,7 @@ public class UserDaoImplTest {
                 LocalDate.of(1968,12,24));
         userStorage.delete(userDelete);
 
-        Optional<User> userOptional2 = userStorage.getUserById(1);
+        Optional<User> userOptional2 = userStorage.getById(1);
         assertThat(userOptional2)
                 .isEmpty();
     }
@@ -98,7 +97,7 @@ public class UserDaoImplTest {
     @Test
     public void getUserById() {
         data();
-        Optional<User> userOptional1 = userStorage.getUserById(1);
+        Optional<User> userOptional1 = userStorage.getById(1);
         assertThat(userOptional1)
                 .isPresent()
                 .hasValueSatisfying(user ->
@@ -112,7 +111,7 @@ public class UserDaoImplTest {
                 LocalDate.of(1967,11,22));
         userStorage.add(user2);
 
-        Collection<User> users = userStorage.getUsers();
+        Collection<User> users = userStorage.getAll();
         assertEquals(users.size(), 2);
     }
 
@@ -122,16 +121,16 @@ public class UserDaoImplTest {
         User user2 = new User(2,"mail@mail.ru", "testLogin2", "testName2",
                 LocalDate.of(1967,11,22));
         userStorage.add(user2);
-        Set<Long> user1Friends = userStorage.getUserFriends(1);
+        Set<Long> user1Friends = userStorage.getFriends(1);
         assertNotNull(user1Friends);
         assertEquals(user1Friends.size(), 0);
         user1Friends.add(user2.getId());
         userStorage.updateFriends(1, user1Friends);
-        Set<Long> user1FriendsTest = userStorage.getUserFriends(1);
+        Set<Long> user1FriendsTest = userStorage.getFriends(1);
         assertNotNull(user1FriendsTest);
         assertEquals(user1FriendsTest.size(), 1);
 
-        Set<Long> user2FriendsTest = userStorage.getUserFriends(2);
+        Set<Long> user2FriendsTest = userStorage.getFriends(2);
         assertNotNull(user2FriendsTest);
         assertEquals(user2FriendsTest.size(), 0);
     }
@@ -144,8 +143,8 @@ public class UserDaoImplTest {
         User user2 = new User(2,"mail@mail.ru", "testLogin2", "testName2",
                 LocalDate.of(1967,11,22));
         userStorage.add(user2);
-        Set<Long> user1Friends = userStorage.getUserFriends(1);
-        Set<Long> user2Friends = userStorage.getUserFriends(2);
+        Set<Long> user1Friends = userStorage.getFriends(1);
+        Set<Long> user2Friends = userStorage.getFriends(2);
         assertNotNull(user1Friends);
         assertEquals(user1Friends.size(), 0);
         assertNotNull(user2Friends);
@@ -154,10 +153,10 @@ public class UserDaoImplTest {
         user2Friends.add(user1.getId());
         userStorage.updateFriends(1, user1Friends);
         userStorage.updateFriends(2, user2Friends);
-        Set<Long> user1FriendsTest = userStorage.getUserFriends(1);
+        Set<Long> user1FriendsTest = userStorage.getFriends(1);
         assertNotNull(user1FriendsTest);
         assertEquals(user1FriendsTest.size(), 1);
-        Set<Long> user2FriendsTest = userStorage.getUserFriends(2);
+        Set<Long> user2FriendsTest = userStorage.getFriends(2);
         assertNotNull(user2FriendsTest);
         assertEquals(user2FriendsTest.size(), 1);
     }
@@ -168,16 +167,16 @@ public class UserDaoImplTest {
         User user2 = new User(2,"mail@mail.ru", "testLogin2", "testName2",
                 LocalDate.of(1967,11,22));
         userStorage.add(user2);
-        Set<Long> user1Friends = userStorage.getUserFriends(1);
+        Set<Long> user1Friends = userStorage.getFriends(1);
         assertNotNull(user1Friends);
         assertEquals(user1Friends.size(), 0);
         user1Friends.add(user2.getId());
         userStorage.updateFriends(1, user1Friends);
-        Set<Long> user1FriendsTest = userStorage.getUserFriends(1);
+        Set<Long> user1FriendsTest = userStorage.getFriends(1);
         assertNotNull(user1FriendsTest);
         assertEquals(user1FriendsTest.size(), 1);
         userStorage.deleteFriend(1, user2.getId());
-        Set<Long> user1FriendsTest2 = userStorage.getUserFriends(1);
+        Set<Long> user1FriendsTest2 = userStorage.getFriends(1);
         assertNotNull(user1FriendsTest2);
         assertEquals(user1FriendsTest2.size(), 0);
     }

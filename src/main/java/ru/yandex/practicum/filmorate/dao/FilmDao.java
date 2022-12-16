@@ -15,19 +15,19 @@ public interface FilmDao {
 
     long getSize();
 
-    Collection<Film> getFilms();
+    Collection<Film> getAll();
 
-    Optional<Film> getFilmById(long filmId);
+    Optional<Film> getById(long filmId);
 
     Film update(Film film);
 
     List<Film> getPopular(Integer count);
 
-    Collection<Genre> getGenres();
+    //Collection<Genre> getGenres();
 
-    Optional<Genre> getGenreById(int id);
+    //Optional<Genre> getGenreById(int id);
 
-    Collection<Mpa> getMpa();
+    //Collection<Mpa> getMpa();
 
-    Optional<Mpa> getMpaById(int id);
+    //Optional<Mpa> getMpaById(int id);
 }

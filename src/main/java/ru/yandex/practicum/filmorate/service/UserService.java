@@ -24,7 +24,7 @@ public class UserService {
 
     public Collection<User> getUsers(){
         log.info("Количество пользователей: " + userStorage.getSize());
-        return userStorage.getUsers();
+        return userStorage.getAll();
     }
 
     public User create(User user){
@@ -43,7 +43,7 @@ public class UserService {
     public List<User> getUserFriends(long userId){
         getUserById(userId);
         log.info("Запрос списка друзей пользователя с id: " + userId);
-        return userStorage.getUserFriends(userId).stream()
+        return userStorage.getFriends(userId).stream()
                 .map(this::getUserById)
                 .collect(Collectors.toList());
     }
@@ -52,8 +52,8 @@ public class UserService {
         getUserById(id);
         getUserById(otherId);
         log.info("Запрос списка общих друзей пользователей с id: " + id + ", " + otherId);
-        Set<Long> userOneFriends = userStorage.getUserFriends(id);
-        Set<Long> userTwoFriends = userStorage.getUserFriends(otherId);
+        Set<Long> userOneFriends = userStorage.getFriends(id);
+        Set<Long> userTwoFriends = userStorage.getFriends(otherId);
         return userOneFriends.stream()
                 .filter(userTwoFriends::contains)
                 .map(this::getUserById)
@@ -62,7 +62,7 @@ public class UserService {
 
     public User getUserById(Long id){
         log.info("Запрос пользователя с id: " + id);
-        return userStorage.getUserById(id)
+        return userStorage.getById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь c id: %d не найден", id))
                 );
     }
@@ -70,7 +70,7 @@ public class UserService {
     public void addFriend(long id, long friendId){
         getUserById(id);
         getUserById(friendId);
-        Set<Long> userFriends = userStorage.getUserFriends(id);
+        Set<Long> userFriends = userStorage.getFriends(id);
         userFriends.add(friendId);
         userStorage.updateFriends(id, userFriends);
         log.info("Добавление в друзья user с id: " + id + " друга с id: " + friendId);
@@ -79,7 +79,7 @@ public class UserService {
     public void deleteFriend(long id, long friendId){
         getUserById(id);
         getUserById(friendId);
-        Set<Long> userFriends = userStorage.getUserFriends(id);
+        Set<Long> userFriends = userStorage.getFriends(id);
         if(userFriends.contains(friendId)){
             userStorage.deleteFriend(id, friendId);
             log.info("Удаление из друзей user с id: " + id + " друга с id: " + friendId);

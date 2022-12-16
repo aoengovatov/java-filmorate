@@ -55,7 +55,7 @@ public class FilmDaoImpl implements FilmDao{
                 jdbcTemplate.update(sql, id, genre.getId());
             }
         }
-        film.setGenres(getGenresByFilm(id));
+        genreDao.loadGenresByFilm(film);
         return film;
     }
 
@@ -67,17 +67,20 @@ public class FilmDaoImpl implements FilmDao{
     }
 
     @Override
-    public Collection<Film> getFilms() {
+    public Collection<Film> getAll() {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        Collection<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        genreDao.loadGenres(films);
+        return films;
     }
 
     @Override
-    public Optional<Film> getFilmById(long filmId) {
+    public Optional<Film> getById(long filmId) {
         String sql1 = "select * from films as f join mpa as m on f.mpa = m.mpa_id and f.id = ?";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql1, filmId);
         if(filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sql1, (rs, rowNum) -> mapRowToFilm(rs, rowNum), filmId);
+            genreDao.loadGenresByFilm(film);
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -93,7 +96,7 @@ public class FilmDaoImpl implements FilmDao{
                 film.getReleaseDate(), film.getDuration(), 0, film.getMpa().getId(), film.getId());
         genreDao.deleteInFilm(film.getId());
         genreDao.updateInFilm(film);
-        film.setGenres(getGenresByFilm(film.getId()));
+        genreDao.loadGenresByFilm(film);
         return film;
     }
 
@@ -101,53 +104,9 @@ public class FilmDaoImpl implements FilmDao{
     public List<Film> getPopular(Integer count) {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id " +
                 "order by rate desc limit ?";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
-    }
-
-    @Override
-    public Collection<Genre> getGenres() {
-        String sqlQuery = "select * from genre";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
-    }
-
-    @Override
-    public Optional<Genre> getGenreById(int genreId) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", genreId);
-        if(genreRows.next()) {
-            Genre genre = new Genre(
-                    genreRows.getInt("id"),
-                    genreRows.getString("name"));
-
-            log.info("Найден жанр: {} {}", genre.getId(), genre.getName());
-
-            return Optional.of(genre);
-        } else {
-            log.info("Жанр с id: {} не найден.", genreId);
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Collection<Mpa> getMpa() {
-        String sqlQuery = "select * from mpa";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
-    }
-
-    @Override
-    public Optional<Mpa> getMpaById(int mpaId) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from mpa where mpa_id = ?", mpaId);
-        if(genreRows.next()) {
-            Mpa mpa = new Mpa(
-                    genreRows.getInt("mpa_id"),
-                    genreRows.getString("mpa_name"));
-
-            log.info("Найден mpa: {} {}", mpa.getId(), mpa.getName());
-
-            return Optional.of(mpa);
-        } else {
-            log.info("Mpa с id: {} не найден.", mpaId);
-            return Optional.empty();
-        }
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        genreDao.loadGenres(films);
+        return films;
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -164,30 +123,68 @@ public class FilmDaoImpl implements FilmDao{
                 .mpa(mpa)
                 .rate(resultSet.getInt("rate"))
                 .build();
-        film.setGenres(getGenresByFilm(film.getId()));
         return film;
     }
 
-    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
-                .build();
-    }
+//    @Override
+//    public Collection<Genre> getGenres() {
+//        String sqlQuery = "select * from genre";
+//        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
+//    }
 
-    private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
-        return Mpa.builder()
-                .id(resultSet.getInt("mpa_id"))
-                .name(resultSet.getString("mpa_name"))
-                .build();
-    }
+//    @Override
+//    public Optional<Genre> getGenreById(int genreId) {
+//        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", genreId);
+//        if(genreRows.next()) {
+//            Genre genre = new Genre(
+//                    genreRows.getInt("id"),
+//                    genreRows.getString("name"));
+//
+//            log.info("Найден жанр: {} {}", genre.getId(), genre.getName());
+//
+//            return Optional.of(genre);
+//        } else {
+//            log.info("Жанр с id: {} не найден.", genreId);
+//            return Optional.empty();
+//        }
+//    }
 
-    private Set<Genre> getGenresByFilm(long filmId) {
-        Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-        String sql1 = "select * from genre as g " +
-                "join film_genres as f on f.genre_id = g.id where f.film_id = ?";
-        List<Genre> genresByFilm = jdbcTemplate.query(sql1, this::mapRowToGenre, filmId);
-        genres.addAll(genresByFilm);
-        return genres;
-    }
+//    @Override
+//    public Collection<Mpa> getMpa() {
+//        String sqlQuery = "select * from mpa";
+//        return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
+//    }
+//
+//    @Override
+//    public Optional<Mpa> getMpaById(int mpaId) {
+//        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from mpa where mpa_id = ?", mpaId);
+//        if(genreRows.next()) {
+//            Mpa mpa = new Mpa(
+//                    genreRows.getInt("mpa_id"),
+//                    genreRows.getString("mpa_name"));
+//
+//            log.info("Найден mpa: {} {}", mpa.getId(), mpa.getName());
+//
+//            return Optional.of(mpa);
+//        } else {
+//            log.info("Mpa с id: {} не найден.", mpaId);
+//            return Optional.empty();
+//        }
+//    }
+
+
+
+//    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
+//        return Genre.builder()
+//                .id(resultSet.getInt("id"))
+//                .name(resultSet.getString("name"))
+//                .build();
+//    }
+
+//    private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
+//        return Mpa.builder()
+//                .id(resultSet.getInt("mpa_id"))
+//                .name(resultSet.getString("mpa_name"))
+//                .build();
+//    }
 }

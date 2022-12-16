@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.dao.LikeDao;
+import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -14,12 +16,17 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage{
 
     private final FilmDao filmDao;
+    private final GenreDao genreDao;
     private final LikeDao likeDao;
 
+    private final MpaDao mpaDao;
+
     @Autowired
-    public FilmDbStorage(FilmDao filmDao, LikeDao likeDao) {
+    public FilmDbStorage(FilmDao filmDao, LikeDao likeDao, GenreDao genreDao, MpaDao mpaDao) {
         this.filmDao = filmDao;
         this.likeDao = likeDao;
+        this.genreDao = genreDao;
+        this.mpaDao = mpaDao;
     }
 
     @Override
@@ -44,12 +51,12 @@ public class FilmDbStorage implements FilmStorage{
 
     @Override
     public Collection<Film> getFilms() {
-        return filmDao.getFilms();
+        return filmDao.getAll();
     }
 
     @Override
     public Optional<Film> getFilmById(long filmId) {
-        return filmDao.getFilmById(filmId);
+        return filmDao.getById(filmId);
     }
 
     @Override
@@ -69,21 +76,21 @@ public class FilmDbStorage implements FilmStorage{
 
     @Override
     public Collection<Genre> getGenres() {
-        return filmDao.getGenres();
+        return genreDao.getAll();
     }
 
     @Override
     public Optional<Genre> getGenreById(int id) {
-        return filmDao.getGenreById(id);
+        return genreDao.getById(id);
     }
 
     @Override
     public Collection<Mpa> getMpa() {
-        return filmDao.getMpa();
+        return mpaDao.getAll();
     }
 
     @Override
     public Optional<Mpa> getMpaById(int id) {
-        return filmDao.getMpaById(id);
+        return mpaDao.getById(id);
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.FriendDao;
 import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
 public class UserDbStorage implements UserStorage{
 
     private final UserDao userDao;
+    private final FriendDao friendDao;
 
     @Autowired
-    public UserDbStorage(UserDao userDao) {
+    public UserDbStorage(UserDao userDao, FriendDao friendDao) {
         this.userDao = userDao;
+        this.friendDao = friendDao;
     }
 
     @Override
@@ -42,33 +45,33 @@ public class UserDbStorage implements UserStorage{
     }
 
     @Override
-    public Collection<User> getUsers() {
-        return userDao.getUsers();
+    public Collection<User> getAll() {
+        return userDao.getAll();
     }
 
     @Override
-    public Set<Long> getUserFriends(long userId) {
-        return userDao.getUserFriends(userId);
+    public Set<Long> getFriends(long userId) {
+        return friendDao.getFriends(userId);
     }
 
     @Override
-    public Optional<User> getUserById(long userId) {
-        return userDao.getUserById(userId);
+    public Optional<User> getById(long userId) {
+        return userDao.getById(userId);
     }
 
     @Override
     public void updateFriends(long id, Set<Long> friends) {
-        Set<Long> oldFriends = userDao.getUserFriends(id);
+        Set<Long> oldFriends = friendDao.getFriends(id);
         List<Long> newFriends = friends.stream()
                 .filter(element -> !oldFriends.contains(element))
                 .collect(Collectors.toList());
         if(newFriends.size() == 1){
-            userDao.updateFriends(id, newFriends.get(0), "true");
+            friendDao.updateFriends(id, newFriends.get(0), "true");
         }
     }
 
     @Override
     public void deleteFriend(long id, long userFriend) {
-        userDao.deleteFriend(id, userFriend);
+        friendDao.deleteFriend(id, userFriend);
     }
 }

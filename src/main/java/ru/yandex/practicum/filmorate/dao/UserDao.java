@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface UserDao {
-    Optional<User> getUserById(long id);
+    Optional<User> getById(long id);
 
     User create(User user);
 
@@ -15,13 +15,13 @@ public interface UserDao {
 
     void delete(User user);
 
-    List<User> getUsers();
+    List<User> getAll();
 
-    Set<Long> getUserFriends(long userId);
+    //Set<Long> getUserFriends(long userId);
 
-    void updateFriends(long id, long friendId, String status);
+    //void updateFriends(long id, long friendId, String status);
 
-    void deleteFriend(long id, long userFriend);
+    //void deleteFriend(long id, long userFriend);
 
     long getSize();
 }
