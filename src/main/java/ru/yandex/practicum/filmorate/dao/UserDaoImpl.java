@@ -78,24 +78,6 @@ public class UserDaoImpl implements UserDao{
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
-//    @Override
-//    public Set<Long> getUserFriends(long userId) {
-//        String sqlQuery = "select friend_id from friends where user_id = " + userId;
-//        List<Long> friends = jdbcTemplate.queryForList(sqlQuery, Long.class);
-//        return new HashSet<>(friends);
-//    }
-//
-//    @Override
-//    public void updateFriends(long id, long friendId, String status) {
-//        jdbcTemplate.update("insert into friends (user_id, friend_id, status) values (?,?,?)",
-//                id, friendId, status);
-//    }
-//
-//    @Override
-//    public void deleteFriend(long id, long userFriend) {
-//        jdbcTemplate.update("delete friends where user_id = ? and friend_id = ?", id, userFriend);
-//    }
-
     @Override
     public long getSize() {
         String sqlQuery = "select count(*) from users";

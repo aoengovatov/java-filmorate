@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -15,13 +16,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class FilmDaoImpl implements FilmDao{
 
     private JdbcTemplate jdbcTemplate;
-
     private GenreDao genreDao;
     private LikeDao likeDao;
     public FilmDaoImpl(JdbcTemplate jdbcTemplate, GenreDao genreDao, LikeDao likeDao){
@@ -49,11 +50,12 @@ public class FilmDaoImpl implements FilmDao{
         film.setId(id);
 
         if(!film.getGenres().isEmpty()){
-            for (Genre genre : film.getGenres()){
-                String sql = "insert into film_genres (film_id, genre_id) " +
-                        "values (?,?)";
-                jdbcTemplate.update(sql, id, genre.getId());
-            }
+            String sql = "insert into film_genres (film_id, genre_id) values (?,?)";
+            jdbcTemplate.batchUpdate(sql, film.getGenres(), film.getGenres().size(),
+                    (ps, genre) -> {
+                        ps.setLong(1, film.getId());
+                        ps.setInt(2, genre.getId());
+                    });
         }
         genreDao.loadGenresByFilm(film);
         return film;
@@ -111,7 +113,7 @@ public class FilmDaoImpl implements FilmDao{
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         int mpaId = resultSet.getInt("mpa_id");
-        String mpaName = resultSet.getString("mpa_name");;
+        String mpaName = resultSet.getString("mpa_name");
         Mpa mpa = new Mpa(mpaId, mpaName);
 
         Film film = Film.builder()
@@ -125,66 +127,4 @@ public class FilmDaoImpl implements FilmDao{
                 .build();
         return film;
     }
-
-//    @Override
-//    public Collection<Genre> getGenres() {
-//        String sqlQuery = "select * from genre";
-//        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
-//    }
-
-//    @Override
-//    public Optional<Genre> getGenreById(int genreId) {
-//        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from genre where id = ?", genreId);
-//        if(genreRows.next()) {
-//            Genre genre = new Genre(
-//                    genreRows.getInt("id"),
-//                    genreRows.getString("name"));
-//
-//            log.info("Найден жанр: {} {}", genre.getId(), genre.getName());
-//
-//            return Optional.of(genre);
-//        } else {
-//            log.info("Жанр с id: {} не найден.", genreId);
-//            return Optional.empty();
-//        }
-//    }
-
-//    @Override
-//    public Collection<Mpa> getMpa() {
-//        String sqlQuery = "select * from mpa";
-//        return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
-//    }
-//
-//    @Override
-//    public Optional<Mpa> getMpaById(int mpaId) {
-//        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from mpa where mpa_id = ?", mpaId);
-//        if(genreRows.next()) {
-//            Mpa mpa = new Mpa(
-//                    genreRows.getInt("mpa_id"),
-//                    genreRows.getString("mpa_name"));
-//
-//            log.info("Найден mpa: {} {}", mpa.getId(), mpa.getName());
-//
-//            return Optional.of(mpa);
-//        } else {
-//            log.info("Mpa с id: {} не найден.", mpaId);
-//            return Optional.empty();
-//        }
-//    }
-
-
-
-//    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-//        return Genre.builder()
-//                .id(resultSet.getInt("id"))
-//                .name(resultSet.getString("name"))
-//                .build();
-//    }
-
-//    private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
-//        return Mpa.builder()
-//                .id(resultSet.getInt("mpa_id"))
-//                .name(resultSet.getString("mpa_name"))
-//                .build();
-//    }
 }

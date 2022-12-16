@@ -17,11 +17,5 @@ public interface UserDao {
 
     List<User> getAll();
 
-    //Set<Long> getUserFriends(long userId);
-
-    //void updateFriends(long id, long friendId, String status);
-
-    //void deleteFriend(long id, long userFriend);
-
     long getSize();
 }

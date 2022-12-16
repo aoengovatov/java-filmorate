@@ -22,12 +22,4 @@ public interface FilmDao {
     Film update(Film film);
 
     List<Film> getPopular(Integer count);
-
-    //Collection<Genre> getGenres();
-
-    //Optional<Genre> getGenreById(int id);
-
-    //Collection<Mpa> getMpa();
-
-    //Optional<Mpa> getMpaById(int id);
 }
