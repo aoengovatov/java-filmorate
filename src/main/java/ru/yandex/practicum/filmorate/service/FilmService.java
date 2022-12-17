@@ -68,7 +68,7 @@ public class FilmService {
         return filmDao.update(film);
     }
 
-    public Collection<Film> getPopular(Integer count){
+    public List<Film> getPopular(Integer count){
         return filmDao.getPopular(count);
     }
 }

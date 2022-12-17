@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -36,7 +37,7 @@ public class GenreService {
         return genreDao.loadGenresByFilm(film);
     }
 
-    public Collection<Film> loadGenres(Collection<Film> films) {
+    public List<Film> loadGenres(List<Film> films) {
         return genreDao.loadGenres(films);
     }
 

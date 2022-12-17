@@ -57,9 +57,9 @@ public class FilmDaoImpl implements FilmDao{
     }
 
     @Override
-    public Collection<Film> getAll() {
+    public List<Film> getAll() {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id";
-        Collection<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         films = genreService.loadGenres(films);
         return films;
     }
@@ -91,10 +91,10 @@ public class FilmDaoImpl implements FilmDao{
     }
 
     @Override
-    public Collection<Film> getPopular(Integer count) {
+    public List<Film> getPopular(Integer count) {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id " +
                 "order by rate desc limit ?";
-        Collection<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
         films = genreService.loadGenres(films);
         return films;
     }

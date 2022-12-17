@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface GenreDao {
@@ -11,7 +12,7 @@ public interface GenreDao {
 
    void updateInFilm(Film film);
 
-   Collection<Film> loadGenres(Collection<Film> films);
+   List<Film> loadGenres(List<Film> films);
 
    Film loadGenresByFilm(Film film);
 
