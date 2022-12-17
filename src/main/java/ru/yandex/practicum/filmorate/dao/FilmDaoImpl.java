@@ -1,34 +1,30 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class FilmDaoImpl implements FilmDao{
 
     private JdbcTemplate jdbcTemplate;
-    private GenreDao genreDao;
-    private LikeDao likeDao;
-    public FilmDaoImpl(JdbcTemplate jdbcTemplate, GenreDao genreDao, LikeDao likeDao){
+    private GenreService genreService;
+    public FilmDaoImpl(JdbcTemplate jdbcTemplate, GenreService genreService){
         this.jdbcTemplate = jdbcTemplate;
-        this.genreDao = genreDao;
-        this.likeDao = likeDao;
+        this.genreService = genreService;
     }
 
     @Override
@@ -57,7 +53,7 @@ public class FilmDaoImpl implements FilmDao{
                         ps.setInt(2, genre.getId());
                     });
         }
-        genreDao.loadGenresByFilm(film);
+        genreService.loadGenresByFilm(film);
         return film;
     }
 
@@ -72,7 +68,7 @@ public class FilmDaoImpl implements FilmDao{
     public Collection<Film> getAll() {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id";
         Collection<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
-        genreDao.loadGenres(films);
+        genreService.loadGenres(films);
         return films;
     }
 
@@ -82,7 +78,7 @@ public class FilmDaoImpl implements FilmDao{
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql1, filmId);
         if(filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sql1, (rs, rowNum) -> mapRowToFilm(rs, rowNum), filmId);
-            genreDao.loadGenresByFilm(film);
+            genreService.loadGenresByFilm(film);
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -96,9 +92,9 @@ public class FilmDaoImpl implements FilmDao{
         jdbcTemplate.update("update films set name = ?, description = ?, release_date = ?, " +
                         "duration = ?, rate = ?, mpa = ? where id = ?", film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), 0, film.getMpa().getId(), film.getId());
-        genreDao.deleteInFilm(film.getId());
-        genreDao.updateInFilm(film);
-        genreDao.loadGenresByFilm(film);
+        genreService.deleteInFilm(film.getId());
+        genreService.updateInFilm(film);
+        genreService.loadGenresByFilm(film);
         return film;
     }
 
@@ -107,7 +103,7 @@ public class FilmDaoImpl implements FilmDao{
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id " +
                 "order by rate desc limit ?";
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
-        genreDao.loadGenres(films);
+        genreService.loadGenres(films);
         return films;
     }
 

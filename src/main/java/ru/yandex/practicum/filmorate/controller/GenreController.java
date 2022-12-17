@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.Collection;
 
@@ -18,11 +18,11 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GenreController {
 
-    private final FilmService filmService;
+    private final GenreService genreService;
 
     @GetMapping
     public Collection<Genre> getAll(){
-        return filmService.getGenres();
+        return genreService.getAll();
     }
 
     @GetMapping("/{id}")
@@ -31,7 +31,7 @@ public class GenreController {
             log.info("Запрос жанра с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
-        return filmService.getGenreById(id);
+        return genreService.getById(id);
     }
 }
 

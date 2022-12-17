@@ -2,11 +2,11 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FriendDao;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,73 +15,76 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-    private final UserStorage userStorage;
+    private final UserDao userDao;
+    private final FriendDao friendDao;
 
     @Autowired
-    UserService(@Qualifier("userDbStorage") UserStorage userStorage){
-        this.userStorage = userStorage;
+    UserService(UserDao userDao, FriendDao friendDao){
+        this.userDao = userDao;
+        this.friendDao = friendDao;
     }
 
-    public Collection<User> getUsers(){
-        log.info("Количество пользователей: " + userStorage.getSize());
-        return userStorage.getAll();
+    public Collection<User> getAll(){
+        log.info("Количество пользователей: " + userDao.getSize());
+        return userDao.getAll();
     }
 
     public User create(User user){
-        user = userStorage.add(user);
+        user = userDao.create(user);
         log.info("Создан пользователь: " + user);
         return user;
     }
 
     public User update(User user) {
-        getUserById(user.getId());
-        userStorage.update(user);
+        getById(user.getId());
+        userDao.update(user);
         log.info("Обновлен пользователь: " + user);
         return user;
     }
 
-    public List<User> getUserFriends(long userId){
-        getUserById(userId);
+    public List<User> getFriends(long userId){
+        getById(userId);
         log.info("Запрос списка друзей пользователя с id: " + userId);
-        return userStorage.getFriends(userId).stream()
-                .map(this::getUserById)
+        return friendDao.getFriends(userId).stream()
+                .map(this::getById)
                 .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(long id, long otherId){
-        getUserById(id);
-        getUserById(otherId);
+        getById(id);
+        getById(otherId);
         log.info("Запрос списка общих друзей пользователей с id: " + id + ", " + otherId);
-        Set<Long> userOneFriends = userStorage.getFriends(id);
-        Set<Long> userTwoFriends = userStorage.getFriends(otherId);
-        return userOneFriends.stream()
-                .filter(userTwoFriends::contains)
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        return friendDao.getCommonFriends(id, otherId);
     }
 
-    public User getUserById(Long id){
+    public User getById(Long id){
         log.info("Запрос пользователя с id: " + id);
-        return userStorage.getById(id)
+        return userDao.getById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь c id: %d не найден", id))
                 );
     }
 
     public void addFriend(long id, long friendId){
-        getUserById(id);
-        getUserById(friendId);
-        Set<Long> userFriends = userStorage.getFriends(id);
+        getById(id);
+        getById(friendId);
+        Set<Long> userFriends = friendDao.getFriends(id);
         userFriends.add(friendId);
-        userStorage.updateFriends(id, userFriends);
+        Set<Long> oldFriends = friendDao.getFriends(id);
+        List<Long> newFriends = userFriends.stream()
+                .filter(element -> !oldFriends.contains(element))
+                .collect(Collectors.toList());
+        if(newFriends.size() == 1){
+            friendDao.updateFriends(id, newFriends.get(0), "true");
+        }
         log.info("Добавление в друзья user с id: " + id + " друга с id: " + friendId);
     }
 
     public void deleteFriend(long id, long friendId){
-        getUserById(id);
-        getUserById(friendId);
-        Set<Long> userFriends = userStorage.getFriends(id);
+        getById(id);
+        getById(friendId);
+        Set<Long> userFriends = friendDao.getFriends(id);
         if(userFriends.contains(friendId)){
-            userStorage.deleteFriend(id, friendId);
+            friendDao.deleteFriend(id, friendId);
             log.info("Удаление из друзей user с id: " + id + " друга с id: " + friendId);
         }
     }

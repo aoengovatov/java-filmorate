@@ -28,12 +28,12 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable long id){
+    public Film getById(@PathVariable long id){
         if(id <= 0){
             log.info("Запрос фильма с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
-        return filmService.getFilmById(id);
+        return filmService.getById(id);
     }
 
     @PostMapping
