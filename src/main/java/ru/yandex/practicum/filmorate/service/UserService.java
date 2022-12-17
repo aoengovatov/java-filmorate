@@ -45,9 +45,7 @@ public class UserService {
     public List<User> getFriends(long userId){
         getById(userId);
         log.info("Запрос списка друзей пользователя с id: " + userId);
-        return friendDao.getFriends(userId).stream()
-                .map(this::getById)
-                .collect(Collectors.toList());
+        return friendDao.getFriends(userId);
     }
 
     public List<User> getCommonFriends(long id, long otherId){
@@ -65,25 +63,29 @@ public class UserService {
     }
 
     public void addFriend(long id, long friendId){
-        getById(id);
-        getById(friendId);
-        Set<Long> userFriends = friendDao.getFriends(id);
-        userFriends.add(friendId);
-        Set<Long> oldFriends = friendDao.getFriends(id);
-        List<Long> newFriends = userFriends.stream()
-                .filter(element -> !oldFriends.contains(element))
+        User friend = userDao.getById(friendId).get();
+        List<User> userFriends = friendDao.getFriends(id);
+        List<User> user2Friends = friendDao.getFriends(friendId);
+        String status = "";
+        List<User> commonFriends = userFriends.stream()
+                .filter(element -> !user2Friends.contains(element))
                 .collect(Collectors.toList());
-        if(newFriends.size() == 1){
-            friendDao.updateFriends(id, newFriends.get(0), "true");
+        if(commonFriends.size() == 1){
+            status = "true";
+        } else {
+            status = "false";
         }
-        log.info("Добавление в друзья user с id: " + id + " друга с id: " + friendId);
+        if(!userFriends.contains(friend)){
+            friendDao.updateFriends(id, friendId, status);
+            log.info("Добавление в друзья user с id: " + id + " друга с id: " + friendId);
+        }
     }
 
     public void deleteFriend(long id, long friendId){
         getById(id);
-        getById(friendId);
-        Set<Long> userFriends = friendDao.getFriends(id);
-        if(userFriends.contains(friendId)){
+        User friend = getById(friendId);
+        List<User> userFriends = friendDao.getFriends(id);
+        if(userFriends.contains(friend)){
             friendDao.deleteFriend(id, friendId);
             log.info("Удаление из друзей user с id: " + id + " друга с id: " + friendId);
         }

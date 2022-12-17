@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface FriendDao {
-    Set<Long> getFriends(long userId);
+    List<User> getFriends(long userId);
 
     void updateFriends(long id, long friendId, String status);
 

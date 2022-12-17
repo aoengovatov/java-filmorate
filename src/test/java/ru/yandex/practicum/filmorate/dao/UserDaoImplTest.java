@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -123,15 +124,15 @@ public class UserDaoImplTest {
         User user2 = new User(2,"mail@mail.ru", "testLogin2", "testName2",
                 LocalDate.of(1967,11,22));
         userDao.create(user2);
-        Set<Long> user1Friends = friendDao.getFriends(1);
+        List<User> user1Friends = friendDao.getFriends(1);
         assertNotNull(user1Friends);
         assertEquals(user1Friends.size(), 0);
         userService.addFriend(1, user2.getId());
-        Set<Long> user1FriendsTest = friendDao.getFriends(1);
+        List<User> user1FriendsTest = friendDao.getFriends(1);
         assertNotNull(user1FriendsTest);
         assertEquals(user1FriendsTest.size(), 1);
 
-        Set<Long> user2FriendsTest = friendDao.getFriends(2);
+        List<User> user2FriendsTest = friendDao.getFriends(2);
         assertNotNull(user2FriendsTest);
         assertEquals(user2FriendsTest.size(), 0);
     }
@@ -144,18 +145,18 @@ public class UserDaoImplTest {
         User user2 = new User(2,"mail@mail.ru", "testLogin2", "testName2",
                 LocalDate.of(1967,11,22));
         userDao.create(user2);
-        Set<Long> user1Friends = friendDao.getFriends(1);
-        Set<Long> user2Friends = friendDao.getFriends(2);
+        List<User> user1Friends = friendDao.getFriends(1);
+        List<User> user2Friends = friendDao.getFriends(2);
         assertNotNull(user1Friends);
         assertEquals(user1Friends.size(), 0);
         assertNotNull(user2Friends);
         assertEquals(user2Friends.size(), 0);
         userService.addFriend(1, user2.getId());
         userService.addFriend(2, user1.getId());
-        Set<Long> user1FriendsTest = friendDao.getFriends(1);
+        List<User> user1FriendsTest = friendDao.getFriends(1);
         assertNotNull(user1FriendsTest);
         assertEquals(user1FriendsTest.size(), 1);
-        Set<Long> user2FriendsTest = friendDao.getFriends(2);
+        List<User> user2FriendsTest = friendDao.getFriends(2);
         assertNotNull(user2FriendsTest);
         assertEquals(user2FriendsTest.size(), 1);
     }
@@ -166,15 +167,15 @@ public class UserDaoImplTest {
         User user2 = new User(2,"mail@mail.ru", "testLogin2", "testName2",
                 LocalDate.of(1967,11,22));
         userDao.create(user2);
-        Set<Long> user1Friends = friendDao.getFriends(1);
+        List<User> user1Friends = friendDao.getFriends(1);
         assertNotNull(user1Friends);
         assertEquals(user1Friends.size(), 0);
         userService.addFriend(1, user2.getId());
-        Set<Long> user1FriendsTest = friendDao.getFriends(1);
+        List<User> user1FriendsTest = friendDao.getFriends(1);
         assertNotNull(user1FriendsTest);
         assertEquals(user1FriendsTest.size(), 1);
         userService.deleteFriend(1, user2.getId());
-        Set<Long> user1FriendsTest2 = friendDao.getFriends(1);
+        List<User> user1FriendsTest2 = friendDao.getFriends(1);
         assertNotNull(user1FriendsTest2);
         assertEquals(user1FriendsTest2.size(), 0);
     }

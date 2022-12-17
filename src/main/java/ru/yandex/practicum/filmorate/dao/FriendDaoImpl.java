@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,10 +22,9 @@ public class FriendDaoImpl implements FriendDao{
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Set<Long> getFriends(long userId) {
-        String sqlQuery = "select friend_id from friends where user_id = " + userId;
-        List<Long> friends = jdbcTemplate.queryForList(sqlQuery, Long.class);
-        return new HashSet<>(friends);
+    public List<User> getFriends(long userId) {
+        String sql = "select * from users where id in (select friend_id from friends where user_id = ?)";
+        return jdbcTemplate.query(sql, this::mapRowToUser, userId);
     }
 
     public void updateFriends(long id, long friendId, String status) {

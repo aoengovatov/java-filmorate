@@ -29,12 +29,13 @@ public class GenreDaoImpl implements GenreDao {
 
     @Override
     public void updateInFilm(Film film) {
-        if(!film.getGenres().isEmpty()){
-            for (Genre genre : film.getGenres()){
-                String sql = "insert into film_genres (film_id, genre_id)" +
-                        " values (?,?)";
-                jdbcTemplate.update(sql, film.getId(), genre.getId());
-            }
+        if(film.getGenres() != null){
+            String sql = "insert into film_genres (film_id, genre_id) values (?,?)";
+            jdbcTemplate.batchUpdate(sql, film.getGenres(), film.getGenres().size(),
+                    (ps, genre) -> {
+                        ps.setLong(1, film.getId());
+                        ps.setInt(2, genre.getId());
+                    });
         }
     }
 

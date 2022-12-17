@@ -44,15 +44,7 @@ public class FilmDaoImpl implements FilmDao{
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
         film.setId(id);
-
-        if(!film.getGenres().isEmpty()){
-            String sql = "insert into film_genres (film_id, genre_id) values (?,?)";
-            jdbcTemplate.batchUpdate(sql, film.getGenres(), film.getGenres().size(),
-                    (ps, genre) -> {
-                        ps.setLong(1, film.getId());
-                        ps.setInt(2, genre.getId());
-                    });
-        }
+        updateGenres(film);
         genreService.loadGenresByFilm(film);
         return film;
     }
@@ -122,5 +114,16 @@ public class FilmDaoImpl implements FilmDao{
                 .rate(resultSet.getInt("rate"))
                 .build();
         return film;
+    }
+
+    private void updateGenres(Film film){
+        if(film.getGenres() != null){
+            String sql = "insert into film_genres (film_id, genre_id) values (?,?)";
+            jdbcTemplate.batchUpdate(sql, film.getGenres(), film.getGenres().size(),
+                    (ps, genre) -> {
+                        ps.setLong(1, film.getId());
+                        ps.setInt(2, genre.getId());
+                    });
+        }
     }
 }
