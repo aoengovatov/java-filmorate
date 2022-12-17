@@ -44,7 +44,7 @@ public class FilmService {
         Set<Long> filmLikes = likeDao.getByFilmId(id);
         userService.getById(userId);
         filmLikes.add(userId);
-        likeDao.addByFriendList(id, filmLikes);
+        likeDao.addByFriends(id, filmLikes);
         log.info("Добавление Like фильму с id: " + id + " от пользователя с id: " + userId);
     }
 
@@ -53,7 +53,7 @@ public class FilmService {
         Set<Long> filmLikes = likeDao.getByFilmId(id);
         userService.getById(userId);
         filmLikes.remove(userId);
-        likeDao.addByFriendList(id, filmLikes);
+        likeDao.addByFriends(id, filmLikes);
         log.info("Удаление Like у фильма с id: " + id + " от пользователя с id: " + userId);
     }
 
@@ -68,7 +68,7 @@ public class FilmService {
         return filmDao.update(film);
     }
 
-    public List<Film> getPopular(Integer count){
+    public Collection<Film> getPopular(Integer count){
         return filmDao.getPopular(count);
     }
 }

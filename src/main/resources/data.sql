@@ -4,3 +4,5 @@ MERGE INTO genre (id, name)
 
 MERGE INTO mpa (mpa_id, mpa_name)
     VALUES (1, 'G'), (2, 'PG'), (3, 'PG-13'), (4, 'R'), (5, 'NC-17');
+
+//select film_id fg, genre_id fg, name g from film_genres fg join genre g on fg.genre_id = g.id  where fg.film_id in (1, 2, 3, 4);

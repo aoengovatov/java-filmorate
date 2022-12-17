@@ -44,7 +44,7 @@ public class FilmDaoImpl implements FilmDao{
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
         film.setId(id);
-        updateGenres(film);
+        genreService.updateInFilm(film);
         genreService.loadGenresByFilm(film);
         return film;
     }
@@ -60,7 +60,7 @@ public class FilmDaoImpl implements FilmDao{
     public Collection<Film> getAll() {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id";
         Collection<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
-        genreService.loadGenres(films);
+        films = genreService.loadGenres(films);
         return films;
     }
 
@@ -70,7 +70,7 @@ public class FilmDaoImpl implements FilmDao{
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql1, filmId);
         if(filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sql1, (rs, rowNum) -> mapRowToFilm(rs, rowNum), filmId);
-            genreService.loadGenresByFilm(film);
+            film = genreService.loadGenresByFilm(film);
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -86,16 +86,16 @@ public class FilmDaoImpl implements FilmDao{
                 film.getReleaseDate(), film.getDuration(), 0, film.getMpa().getId(), film.getId());
         genreService.deleteInFilm(film.getId());
         genreService.updateInFilm(film);
-        genreService.loadGenresByFilm(film);
+        film = genreService.loadGenresByFilm(film);
         return film;
     }
 
     @Override
-    public List<Film> getPopular(Integer count) {
+    public Collection<Film> getPopular(Integer count) {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id " +
                 "order by rate desc limit ?";
-        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
-        genreService.loadGenres(films);
+        Collection<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        films = genreService.loadGenres(films);
         return films;
     }
 
@@ -114,16 +114,5 @@ public class FilmDaoImpl implements FilmDao{
                 .rate(resultSet.getInt("rate"))
                 .build();
         return film;
-    }
-
-    private void updateGenres(Film film){
-        if(film.getGenres() != null){
-            String sql = "insert into film_genres (film_id, genre_id) values (?,?)";
-            jdbcTemplate.batchUpdate(sql, film.getGenres(), film.getGenres().size(),
-                    (ps, genre) -> {
-                        ps.setLong(1, film.getId());
-                        ps.setInt(2, genre.getId());
-                    });
-        }
     }
 }

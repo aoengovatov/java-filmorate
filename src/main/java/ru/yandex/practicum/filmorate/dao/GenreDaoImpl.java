@@ -1,15 +1,20 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -41,8 +46,23 @@ public class GenreDaoImpl implements GenreDao {
 
     @Override
     public Collection<Film> loadGenres(Collection<Film> films) {
-        for(Film film : films){
-            loadGenresByFilm(film);
+        if(films != null && !films.isEmpty()) {
+            for(Film film : films){
+                loadGenresByFilm(film);
+            }
+//            final Map<Long, Film> filmMap = films.stream()
+//                    .collect(Collectors.toMap(film -> film.getId(), film -> film, (a, b) -> b));
+//            final List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
+//            String sql = "select film_id fg, genre_id fg, name g from film_genres fg " +
+//            "join genre g on fg.genre_id = g.id  where fg.film_id in (:ids)";
+//            SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
+//            SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sql, parameters);
+//            if (genreRows.next()) {
+//                int filmId = genreRows.getInt("film_id");
+//                Set<Genre> genres = filmMap.get(filmId).getGenres();
+//                genres.add(new Genre(genreRows.getInt("genre_id"), "null"));
+//                filmMap.get(filmId).setGenres(genres);
+//            }
         }
         return films;
     }
