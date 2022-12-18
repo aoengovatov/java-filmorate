@@ -50,5 +50,4 @@ public class MpaDaoImpl implements MpaDao{
                 .name(resultSet.getString("mpa_name"))
                 .build();
     }
-
 }

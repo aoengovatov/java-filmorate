@@ -16,7 +16,7 @@ public class MpaService {
     private final MpaDao mpaDao;
 
     @Autowired
-    MpaService(MpaDao mpaDao){
+    public MpaService(MpaDao mpaDao){
         this.mpaDao = mpaDao;
     }
 

@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.dao;
 import java.util.Set;
 
 public interface LikeDao {
-    void deleteByFilmId(long filmId);
+    void deleteLike(long filmId, long userId);
 
-    void addByFriends(long filmId, Set<Long> friendList);
+    void addLike(long filmId, long userId);
 
-    Set<Long> getByFilmId(long filmId);
+    Set<Long> getAll(long filmId);
 }

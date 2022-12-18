@@ -37,4 +37,9 @@ public class Film {
 
     @Schema(example = "[{\"id\": 1}]")
     private Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
+
+    public Set<Genre> addGenre(Genre genre){
+        genres.add(genre);
+        return genres;
+    }
 }

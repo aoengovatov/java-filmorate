@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class FilmDaoImplTest {
 
     private final FilmDao filmDao;
+    private final FilmService filmService;
     private final UserDao userDao;
     private final LikeDao likeDao;
     private final GenreDao genreDao;
@@ -135,7 +137,7 @@ public class FilmDaoImplTest {
     @Test
     public void addLikes(){
         data();
-        Set<Long> filmLikes = likeDao.getByFilmId(1);
+        Set<Long> filmLikes = likeDao.getAll(1);
         assertEquals(filmLikes.size(), 0);
         Optional<Film> filmOptional = filmDao.getById(1);
         assertThat(filmOptional)
@@ -145,11 +147,9 @@ public class FilmDaoImplTest {
         User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
         userDao.create(user1);
-        Set<Long> filmLikes1 = likeDao.getByFilmId(1);
-        filmLikes1.add(user1.getId());
-        likeDao.addByFriends(1, filmLikes1);
+        likeDao.addLike(1, user1.getId());
 
-        Set<Long> filmLikes2 = likeDao.getByFilmId(1);
+        Set<Long> filmLikes2 = likeDao.getAll(1);
         assertEquals(filmLikes2.size(), 1);
         Optional<Film> filmOptional1 = filmDao.getById(1);
         assertThat(filmOptional1)
@@ -173,9 +173,7 @@ public class FilmDaoImplTest {
         User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
         userDao.create(user1);
-        Set<Long> filmLikes1 = likeDao.getByFilmId(1);
-        filmLikes1.add(user1.getId());
-        likeDao.addByFriends(1, filmLikes1);
+        likeDao.addLike(1, user1.getId());
         Optional<Film> filmOptional1 = filmDao.getById(1);
         assertThat(filmOptional1)
                 .isPresent()
@@ -186,25 +184,22 @@ public class FilmDaoImplTest {
     @Test
     public void deleteLikes(){
         Mpa mpa = new Mpa(1, "null");
-        Set<Genre> genres = new TreeSet<>();
+        Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
         Film film1 = new Film(1, "Аватар", "Описание",
                 LocalDate.of(1995,12,24), 180, 0, mpa, genres);
         filmDao.create(film1);
         User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
         userDao.create(user1);
-        Set<Long> filmLikes1 = likeDao.getByFilmId(1);
-        filmLikes1.add(user1.getId());
-        likeDao.addByFriends(film1.getId(), filmLikes1);
+        likeDao.addLike(film1.getId(), user1.getId());
+
         Optional<Film> filmOptional = filmDao.getById(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
                         assertThat(film).hasFieldOrPropertyWithValue("rate", 1));
 
-        Set<Long> filmLikes2 = likeDao.getByFilmId(1);
-        filmLikes2.remove(user1.getId());
-        likeDao.addByFriends(1, filmLikes2);
+        likeDao.deleteLike(1, user1.getId());
         Optional<Film> filmOptional1 = filmDao.getById(1);
         assertThat(filmOptional1)
                 .isPresent()
@@ -216,16 +211,14 @@ public class FilmDaoImplTest {
     public void getPopular(){
         data();
         Mpa mpa = new Mpa(2, "null");
-        Set<Genre> genres = new TreeSet<>();
+        Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
         Film film2 = new Film(2, "Аватар2", "Описание обновленное",
                 LocalDate.of(1996,11,22), 150, 0, mpa, genres);
         filmDao.create(film2);
         User user1 = new User(1,"mail@mail.ru", "testLogin", "testName",
                 LocalDate.of(1968,12,24));
         userDao.create(user1);
-        Set<Long> filmLikes2 = likeDao.getByFilmId(1);
-        filmLikes2.add(user1.getId());
-        likeDao.addByFriends(film2.getId(), filmLikes2);
+        likeDao.addLike(film2.getId(), user1.getId());
         List<Film> rateFilms = filmDao.getPopular(2);
         assertEquals(rateFilms.size(), 2);
         Film filmFirstRate = rateFilms.get(0);
@@ -260,19 +253,15 @@ public class FilmDaoImplTest {
         genres.add(genre);
         Film filmUpdate = new Film(1, "Аватар2", "Описание обновленное",
                 LocalDate.of(1996,11,22), 150, 4, mpa, genres);
-        filmDao.update(filmUpdate);
+        filmService.update(filmUpdate);
         genres.remove(genre);
-        Mpa mpaTest = new Mpa(2, "PG");
         genre = new Genre(1, "Комедия");
         genres.add(genre);
 
-        Optional<Film> filmOptional = filmDao.getById(1);
-        assertThat(filmOptional)
-                .isPresent()
-                .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("id", (long) 1))
-                .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("genres", genres));
+        Film film = filmService.getById(Long.valueOf(1));
+        assertThat(film)
+                .hasFieldOrPropertyWithValue("id", (long) 1)
+                .hasFieldOrPropertyWithValue("genres", genres);
     }
 
     @Test

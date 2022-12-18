@@ -2,6 +2,9 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -9,15 +12,18 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class GenreDaoImpl implements GenreDao {
 
     private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedJdbcTemplate;
 
-    public GenreDaoImpl(JdbcTemplate jdbcTemplate){
+    public GenreDaoImpl(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedJdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
+        this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
     @Override
@@ -39,26 +45,21 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public List<Film> loadGenres(List<Film> films) {
+    public void loadGenres(List<Film> films) {
         if(films != null && !films.isEmpty()) {
-            for(Film film : films){
-                loadGenresByFilm(film);
-            }
-//            final Map<Long, Film> filmMap = films.stream()
-//                    .collect(Collectors.toMap(film -> film.getId(), film -> film, (a, b) -> b));
-//            final List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
-//            String sql = "select film_id fg, genre_id fg, name g from film_genres fg " +
-//            "join genre g on fg.genre_id = g.id  where fg.film_id in (:ids)";
-//            SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
-//            SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sql, parameters);
-//            if (genreRows.next()) {
-//                int filmId = genreRows.getInt("film_id");
-//                Set<Genre> genres = filmMap.get(filmId).getGenres();
-//                genres.add(new Genre(genreRows.getInt("genre_id"), "null"));
-//                filmMap.get(filmId).setGenres(genres);
-//            }
+            final List<Long> ids = films.stream().map(Film::getId).collect(Collectors.toList());
+            final Map<Long, Film> filmMap = films.stream()
+                    .collect(Collectors.toMap(film -> film.getId(), film -> film, (a, b) -> b));
+            SqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
+            String sql = "select g.ID, NAME, fg.FILM_ID from FILM_GENRES as fg " +
+                    "join GENRE as g on fg.GENRE_ID = g.ID where fg.FILM_ID in (:ids)";
+            namedJdbcTemplate.query(
+                    sql,
+                    parameters,
+                    (rs, rowNum) -> filmMap.get(rs.getLong("film_id"))
+                            .addGenre(new Genre(rs.getInt("id"),
+                                    rs.getString("name"))));
         }
-        return films;
     }
 
     @Override

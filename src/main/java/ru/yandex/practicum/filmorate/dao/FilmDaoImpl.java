@@ -7,8 +7,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -21,10 +21,8 @@ import java.util.*;
 public class FilmDaoImpl implements FilmDao{
 
     private JdbcTemplate jdbcTemplate;
-    private GenreService genreService;
-    public FilmDaoImpl(JdbcTemplate jdbcTemplate, GenreService genreService){
+    public FilmDaoImpl(JdbcTemplate jdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
-        this.genreService = genreService;
     }
 
     @Override
@@ -44,8 +42,6 @@ public class FilmDaoImpl implements FilmDao{
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
         film.setId(id);
-        genreService.updateInFilm(film);
-        genreService.loadGenresByFilm(film);
         return film;
     }
 
@@ -60,7 +56,6 @@ public class FilmDaoImpl implements FilmDao{
     public List<Film> getAll() {
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id";
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
-        films = genreService.loadGenres(films);
         return films;
     }
 
@@ -70,7 +65,6 @@ public class FilmDaoImpl implements FilmDao{
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql1, filmId);
         if(filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sql1, (rs, rowNum) -> mapRowToFilm(rs, rowNum), filmId);
-            film = genreService.loadGenresByFilm(film);
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -84,9 +78,6 @@ public class FilmDaoImpl implements FilmDao{
         jdbcTemplate.update("update films set name = ?, description = ?, release_date = ?, " +
                         "duration = ?, rate = ?, mpa = ? where id = ?", film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), 0, film.getMpa().getId(), film.getId());
-        genreService.deleteInFilm(film.getId());
-        genreService.updateInFilm(film);
-        film = genreService.loadGenresByFilm(film);
         return film;
     }
 
@@ -95,7 +86,6 @@ public class FilmDaoImpl implements FilmDao{
         String sqlQuery = "select * from films as f join mpa as m on f.mpa = m.mpa_id " +
                 "order by rate desc limit ?";
         List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
-        films = genreService.loadGenres(films);
         return films;
     }
 
@@ -103,6 +93,7 @@ public class FilmDaoImpl implements FilmDao{
         int mpaId = resultSet.getInt("mpa_id");
         String mpaName = resultSet.getString("mpa_name");
         Mpa mpa = new Mpa(mpaId, mpaName);
+        Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
 
         Film film = Film.builder()
                 .id(resultSet.getLong("id"))
@@ -112,6 +103,7 @@ public class FilmDaoImpl implements FilmDao{
                 .duration(resultSet.getInt("duration"))
                 .mpa(mpa)
                 .rate(resultSet.getInt("rate"))
+                .genres(genres)
                 .build();
         return film;
     }

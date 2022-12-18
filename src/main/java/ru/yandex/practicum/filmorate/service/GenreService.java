@@ -18,7 +18,7 @@ public class GenreService {
     private final GenreDao genreDao;
 
     @Autowired
-    GenreService(GenreDao genreDao){
+    public GenreService(GenreDao genreDao){
         this.genreDao = genreDao;
     }
 
@@ -37,8 +37,8 @@ public class GenreService {
         return genreDao.loadGenresByFilm(film);
     }
 
-    public List<Film> loadGenres(List<Film> films) {
-        return genreDao.loadGenres(films);
+    public void loadGenres(List<Film> films) {
+        genreDao.loadGenres(films);
     }
 
     public void deleteInFilm(long id) {

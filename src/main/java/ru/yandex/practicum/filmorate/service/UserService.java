@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -19,7 +18,7 @@ public class UserService {
     private final FriendDao friendDao;
 
     @Autowired
-    UserService(UserDao userDao, FriendDao friendDao){
+    public UserService(UserDao userDao, FriendDao friendDao){
         this.userDao = userDao;
         this.friendDao = friendDao;
     }
@@ -63,20 +62,11 @@ public class UserService {
     }
 
     public void addFriend(long id, long friendId){
+        userDao.getById(id).get();
         User friend = userDao.getById(friendId).get();
         List<User> userFriends = friendDao.getFriends(id);
-        List<User> user2Friends = friendDao.getFriends(friendId);
-        String status = "";
-        List<User> commonFriends = userFriends.stream()
-                .filter(element -> !user2Friends.contains(element))
-                .collect(Collectors.toList());
-        if(commonFriends.size() == 1){
-            status = "true";
-        } else {
-            status = "false";
-        }
         if(!userFriends.contains(friend)){
-            friendDao.updateFriends(id, friendId, status);
+            friendDao.updateFriends(id, friendId);
             log.info("Добавление в друзья user с id: " + id + " друга с id: " + friendId);
         }
     }

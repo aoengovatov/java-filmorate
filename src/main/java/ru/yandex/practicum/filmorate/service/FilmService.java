@@ -17,58 +17,70 @@ public class FilmService {
 
     private final FilmDao filmDao;
     private final UserService userService;
+    private final GenreService genreService;
     private final LikeDao likeDao;
 
     @Autowired
-    FilmService(FilmDao filmDao, UserService userService, LikeDao likeDao){
+    public FilmService(FilmDao filmDao, UserService userService, LikeDao likeDao,
+                GenreService genreService){
         this.filmDao = filmDao;
         this.userService = userService;
         this.likeDao = likeDao;
+        this.genreService = genreService;
     }
 
-    public Collection<Film> getAll(){
-        Collection<Film> films = filmDao.getAll();
+    public List<Film> getAll(){
+        List<Film> films = filmDao.getAll();
+        genreService.loadGenres(films);
         log.info("Количество фильмов: " + films.size());
         return films;
     }
 
     public Film getById(Long id){
         log.info("Запрос фильма с id: " + id);
-        return filmDao.getById(id)
-                .orElseThrow(() -> new FilmNotFoundException(String.format("Фильм c id: %d не найден", id))
+        Optional<Film> film = filmDao.getById(id);
+        if(film.isPresent()){
+            genreService.loadGenresByFilm(film.get());
+        }
+        return film.orElseThrow(() -> new FilmNotFoundException(String.format("Фильм c id: %d не найден", id))
                 );
     }
 
     public void addLike(long id, long userId){
         filmDao.getById(id);
-        Set<Long> filmLikes = likeDao.getByFilmId(id);
         userService.getById(userId);
-        filmLikes.add(userId);
-        likeDao.addByFriends(id, filmLikes);
+        likeDao.addLike(id, userId);
         log.info("Добавление Like фильму с id: " + id + " от пользователя с id: " + userId);
     }
 
     public void deleteLike(long id, long userId){
         filmDao.getById(id);
-        Set<Long> filmLikes = likeDao.getByFilmId(id);
         userService.getById(userId);
-        filmLikes.remove(userId);
-        likeDao.addByFriends(id, filmLikes);
+        likeDao.deleteLike(id, userId);
         log.info("Удаление Like у фильма с id: " + id + " от пользователя с id: " + userId);
     }
 
     public Film create(Film film) {
+        filmDao.create(film);
+        genreService.updateInFilm(film);
+        genreService.loadGenresByFilm(film);
         log.info("Создан фильм: " + film);
-        return filmDao.create(film);
+        return film;
     }
 
     public Film update(Film film) {
         getById(film.getId());
+        filmDao.update(film);
         log.info("Обновлен фильм: " + film);
-        return filmDao.update(film);
+        genreService.deleteInFilm(film.getId());
+        genreService.updateInFilm(film);
+        genreService.loadGenresByFilm(film);
+        return film;
     }
 
     public List<Film> getPopular(Integer count){
-        return filmDao.getPopular(count);
+        List<Film> films = filmDao.getPopular(count);
+        genreService.loadGenres(films);
+        return films;
     }
 }

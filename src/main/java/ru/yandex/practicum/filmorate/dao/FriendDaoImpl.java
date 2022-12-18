@@ -20,13 +20,13 @@ public class FriendDaoImpl implements FriendDao{
     }
 
     public List<User> getFriends(long userId) {
-        String sql = "select * from users where id in (select friend_id from friends where user_id = ?)";
+        String sql = "select * from users, friends where users.id = friends.friend_id and friends.user_id = ?";
         return jdbcTemplate.query(sql, this::mapRowToUser, userId);
     }
 
-    public void updateFriends(long id, long friendId, String status) {
-        jdbcTemplate.update("insert into friends (user_id, friend_id, status) values (?,?,?)",
-                id, friendId, status);
+    public void updateFriends(long id, long friendId) {
+        jdbcTemplate.update("insert into friends (user_id, friend_id) values (?,?)",
+                id, friendId);
     }
 
     public void deleteFriend(long id, long userFriend) {

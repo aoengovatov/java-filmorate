@@ -12,7 +12,7 @@ public interface GenreDao {
 
    void updateInFilm(Film film);
 
-   List<Film> loadGenres(List<Film> films);
+   void loadGenres(List<Film> films);
 
    Film loadGenresByFilm(Film film);
 
