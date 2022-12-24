@@ -3,73 +3,84 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.LikeDao;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
 
-    private final FilmStorage filmStorage;
+    private final FilmDao filmDao;
     private final UserService userService;
+    private final GenreService genreService;
+    private final LikeDao likeDao;
 
     @Autowired
-    FilmService(FilmStorage filmStorage, UserService userService){
-        this.filmStorage = filmStorage;
+    public FilmService(FilmDao filmDao, UserService userService, LikeDao likeDao,
+                GenreService genreService){
+        this.filmDao = filmDao;
         this.userService = userService;
+        this.likeDao = likeDao;
+        this.genreService = genreService;
     }
 
-    public Collection<Film> getFilms(){
-        log.info("Количество фильмов: " + filmStorage.getSize());
-        return filmStorage.getFilms();
+    public List<Film> getAll(){
+        List<Film> films = filmDao.getAll();
+        genreService.loadGenres(films);
+        log.info("Количество фильмов: " + films.size());
+        return films;
     }
 
-    public Film getFilmById(Long id){
+    public Film getById(Long id){
         log.info("Запрос фильма с id: " + id);
-        return filmStorage.getFilmById(id)
-                .orElseThrow(() -> new FilmNotFoundException(String.format("Фильм c id: %d не найден", id))
+        Optional<Film> film = filmDao.getById(id);
+        if(film.isPresent()){
+            genreService.loadGenresByFilm(film.get());
+        }
+        return film.orElseThrow(() -> new FilmNotFoundException(String.format("Фильм c id: %d не найден", id))
                 );
     }
 
     public void addLike(long id, long userId){
-        filmStorage.getFilmById(id);
-        Set<Long> filmLikes = filmStorage.getLikesById(id);
-        userService.getUserById(userId);
-        filmLikes.add(userId);
-        filmStorage.updateLikes(id, filmLikes);
+        filmDao.getById(id);
+        userService.getById(userId);
+        likeDao.addLike(id, userId);
         log.info("Добавление Like фильму с id: " + id + " от пользователя с id: " + userId);
     }
 
     public void deleteLike(long id, long userId){
-        filmStorage.getFilmById(id);
-        Set<Long> filmLikes = filmStorage.getLikesById(id);
-        userService.getUserById(userId);
-        filmLikes.remove(userId);
-        filmStorage.updateLikes(id, filmLikes);
+        filmDao.getById(id);
+        userService.getById(userId);
+        likeDao.deleteLike(id, userId);
         log.info("Удаление Like у фильма с id: " + id + " от пользователя с id: " + userId);
     }
 
     public Film create(Film film) {
-        filmStorage.add(film);
+        filmDao.create(film);
+        genreService.updateInFilm(film);
+        genreService.loadGenresByFilm(film);
         log.info("Создан фильм: " + film);
         return film;
     }
 
     public Film update(Film film) {
-        getFilmById(film.getId());
-        filmStorage.update(film);
+        getById(film.getId());
+        filmDao.update(film);
         log.info("Обновлен фильм: " + film);
+        genreService.deleteInFilm(film.getId());
+        genreService.updateInFilm(film);
+        genreService.loadGenresByFilm(film);
         return film;
     }
 
     public List<Film> getPopular(Integer count){
-        return filmStorage.getFilms().stream().sorted((o1, o2) ->
-                        filmStorage.getLikesById(o2.getId()).size() - filmStorage.getLikesById(o1.getId()).size())
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> films = filmDao.getPopular(count);
+        genreService.loadGenres(films);
+        return films;
     }
 }

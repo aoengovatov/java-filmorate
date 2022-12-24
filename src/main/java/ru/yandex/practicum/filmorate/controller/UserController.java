@@ -19,25 +19,25 @@ public class UserController {
 
     private final UserService userService;
     @GetMapping
-    public Collection<User> getUsers(){
-        return userService.getUsers();
+    public Collection<User> getAll(){
+        return userService.getAll();
     }
     @GetMapping( "/{id}")
-    public User getUserById(@PathVariable long id){
+    public User getById(@PathVariable long id){
         if(id <= 0){
             log.info("Запрос пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
-        return userService.getUserById(id);
+        return userService.getById(id);
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getUserFriends(@PathVariable Integer id){
+    public Collection<User> getFriends(@PathVariable Integer id){
         if(id <= 0){
             log.info("Запрос списка друзей пользователя с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
-        return userService.getUserFriends(id);
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")

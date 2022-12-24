@@ -23,17 +23,17 @@ public class FilmController {
     private static final LocalDate FILM_BIRTHDAY = LocalDate.of(1895,12,28);
 
     @GetMapping
-    public Collection<Film> getFilms(){
-        return filmService.getFilms();
+    public Collection<Film> getAll(){
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable long id){
+    public Film getById(@PathVariable long id){
         if(id <= 0){
             log.info("Запрос фильма с неверным id: " + id);
             throw new IncorrectParameterException("id");
         }
-        return filmService.getFilmById(id);
+        return filmService.getById(id);
     }
 
     @PostMapping
@@ -80,8 +80,8 @@ public class FilmController {
 
     @GetMapping("/popular")
     @Validated
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10", required = false)
-                                           @Positive Integer count){
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10")
+                                       @Positive Integer count){
         return filmService.getPopular(count);
     }
 
